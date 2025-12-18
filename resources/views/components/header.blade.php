@@ -1,13 +1,17 @@
 <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-4 mb-8">
-    <div>
-        <h1 class="text-2xl lg:text-3xl font-bold text-gray-900">
-            Hi, {{ $userName ?? 'Adin' }}!
-        </h1>
-        <p class="text-butter-500 font-medium mt-1">{{ $userRole ?? 'Finance' }}</p>
-        <p class="text-gray-600 mt-2">
-            We're excited to have you here. Let's make today productive and smooth.
-        </p>
-    </div>
+    @if (request()->routeIs('dashboard'))    
+        <div>
+            <h1 class="text-2xl lg:text-3xl font-bold text-gray-900">
+                Hi, {{ auth()->user()->name ?? 'User' }}!
+            </h1>
+            <p class="text-butter-500 font-medium mt-1">{{ auth()->user()->hasRole('admin') ? 'Admin' : auth()->user()->team->name }}</p>
+            <p class="text-gray-600 mt-2">
+                We're excited to have you here. Let's make today productive and smooth.
+            </p>
+        </div>
+    @else
+        &nbsp;
+    @endif
     
     <div class="flex items-center gap-3">
         <div class="w-12 h-12 rounded-full overflow-hidden bg-gray-200">

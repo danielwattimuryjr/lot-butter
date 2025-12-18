@@ -8,6 +8,18 @@ class Employee extends Model
 {
     protected $fillable = [
         'name',
-        'team'
+        'phone_number',
+        'nip',
+        'team_id'
     ];
+
+    public function team()
+    {
+        return $this->belongsTo(Team::class);
+    }
+
+    public function user()
+    {
+        return $this->hasOne(User::class);
+    }
 }

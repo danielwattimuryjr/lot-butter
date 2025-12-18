@@ -30,10 +30,16 @@
 
     <div class="flex min-h-[calc(100vh-3rem)] overflow-hidden">
         <!-- Sidebar -->
-        @include('partials.sidebar')
+        @if (auth()->user()->hasRole('admin'))
+            <x-sidebar-admin />
+        @else
+            <x-sidebar-employee />
+        @endif
 
         <!-- Main Content -->
         <main class="flex-1 p-4 lg:p-6 w-full">
+            <x-header />
+
             @yield('content')
         </main>
     </div>

@@ -1,12 +1,6 @@
 @extends('layouts.dashboard')
 
 @section('content')
-    <!-- Header -->
-    @include('partials.header', [
-        'userName' => auth()->user()->name ?? 'Adin',
-        'userRole' => 'Finance'
-    ])
-
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 mb-6">
         <!-- Gross Revenue Card -->

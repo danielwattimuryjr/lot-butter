@@ -87,14 +87,10 @@
         <!-- Right Side - Image -->
         <div class="hidden lg:block flex-1 relative">
             <img 
-                src="{{ asset('images/login-image.jpg') }}" 
+                src="{{ asset('images/login.jpg') }}" 
                 alt="LOT.BUTTER Products"
                 class="w-full h-full object-cover"
             >
-            <!-- Overlay with branding -->
-            <div class="absolute top-4 right-4">
-                <span class="font-handwritten text-white text-xl font-bold drop-shadow-lg">LOT.BUTTER</span>
-            </div>
         </div>
     </div>
 </div>

@@ -31,9 +31,9 @@
         </div>
 
         <!-- Add New Employee Button -->
-        <button class="inline-flex items-center gap-2 px-4 py-2 bg-transparent border-2 border-orange-400 text-orange-400 hover:bg-orange-50 text-sm font-medium rounded-lg transition-colors">
+        <a href="{{ route('admin.employees.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-transparent border-2 border-orange-400 text-orange-400 hover:bg-orange-50 text-sm font-medium rounded-lg transition-colors">
             ADD NEW EMPLOYEE
-        </button>
+        </a>
     </div>
 
     <!-- Table Card -->
@@ -75,7 +75,7 @@
         <!-- Table -->
         <div class="overflow-x-auto">
             <table class="w-full">
-                <thead>
+                <thead class="bg-gray-100">
                     <tr class="border-b border-gray-200">
                         <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">No.</th>
                         <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Name</th>
@@ -86,69 +86,34 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="border-b border-gray-100 hover:bg-gray-50">
-                        <td class="py-4 px-4 text-sm text-gray-700">1</td>
-                        <td class="py-4 px-4 text-sm text-gray-700">Ayu Gita Lestari</td>
-                        <td class="py-4 px-4 text-sm text-gray-700">12012930192</td>
-                        <td class="py-4 px-4 text-sm text-gray-700">08887187232</td>
-                        <td class="py-4 px-4 text-sm text-gray-700">Finance</td>
-                        <td class="py-4 px-4">
-                            <div class="flex items-center gap-3">
-                                <button class="text-orange-400 hover:text-orange-600 transition-colors">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                    </svg>
-                                </button>
-                                <button class="text-orange-400 hover:text-red-600 transition-colors">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                    </svg>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr class="border-b border-gray-100 hover:bg-gray-50">
-                        <td class="py-4 px-4 text-sm text-gray-700">2</td>
-                        <td class="py-4 px-4 text-sm text-gray-700">Adinda Lailatul</td>
-                        <td class="py-4 px-4 text-sm text-gray-700">12012930100</td>
-                        <td class="py-4 px-4 text-sm text-gray-700">08887187212</td>
-                        <td class="py-4 px-4 text-sm text-gray-700">Procurement</td>
-                        <td class="py-4 px-4">
-                            <div class="flex items-center gap-3">
-                                <button class="text-orange-400 hover:text-orange-600 transition-colors">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                    </svg>
-                                </button>
-                                <button class="text-orange-400 hover:text-red-600 transition-colors">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                    </svg>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr class="border-b border-gray-100 hover:bg-gray-50">
-                        <td class="py-4 px-4 text-sm text-gray-700">3</td>
-                        <td class="py-4 px-4 text-sm text-gray-700">Andi Siti</td>
-                        <td class="py-4 px-4 text-sm text-gray-700">12012930187</td>
-                        <td class="py-4 px-4 text-sm text-gray-700">08887187265</td>
-                        <td class="py-4 px-4 text-sm text-gray-700">Production</td>
-                        <td class="py-4 px-4">
-                            <div class="flex items-center gap-3">
-                                <button class="text-orange-400 hover:text-orange-600 transition-colors">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                    </svg>
-                                </button>
-                                <button class="text-orange-400 hover:text-red-600 transition-colors">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                    </svg>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
+                    @foreach ($employees as $employee)
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="py-4 px-4 text-sm text-gray-700">{{ $loop->iteration }}</td>
+                            <td class="py-4 px-4 text-sm text-gray-700">{{ $employee->name}}</td>
+                            <td class="py-4 px-4 text-sm text-gray-700">{{ $employee->nip}}</td>
+                            <td class="py-4 px-4 text-sm text-gray-700">{{ $employee->phone_number }}</td>
+                            <td class="py-4 px-4 text-sm text-gray-700">{{ $employee->team->name }}</td>
+                            <td class="py-4 px-4">
+                                <div class="flex items-center gap-3">
+                                    <a href="{{ route('admin.employees.edit', $employee) }}" class="text-orange-400 hover:text-orange-600 transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                        </svg>
+                                    </a>
+                                    <form method="POST" action="{{ route('admin.employees.destroy', $employee) }}">
+                                        @csrf
+                                        @method('DELETE')
+
+                                        <button type="submit" class="text-orange-400 hover:text-red-600 transition-colors">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
                 </tbody>
             </table>
         </div>
