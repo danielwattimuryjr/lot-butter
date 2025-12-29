@@ -9,9 +9,18 @@ use App\Http\Requests\Team\UpdateRequest;
 
 class TeamController extends Controller
 {
-  public function index()
+  public function index(Request $request)
   {
-    $teams = Team::get();
+    $limit = $request->input('limit', 10);
+
+    $teams = Team::query()
+      ->when(
+        $request->input('name'),
+        fn($query, $name) => $query->where('name', 'like', "%{$name}%"),
+      )
+      ->paginate($request->input('limit', $limit))
+      ->withQueryString();
+
     return view('teams.index', compact('teams'));
   }
 

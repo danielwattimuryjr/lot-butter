@@ -7,13 +7,11 @@
         <div class="flex-1 p-8 lg:p-12 flex flex-col justify-center">
             <!-- Logo -->
             <div class="mb-8">
-                <h1 class="font-handwritten text-4xl lg:text-5xl font-bold text-gray-900 tracking-wide">
-                    LOT.BUTTER
-                </h1>
+                <img src="{{ asset('images/logo.png') }}" alt="LOT.BUTTER Logo" class="mb-2 mx-auto">
             </div>
 
             <!-- Welcome Text -->
-            <div class="mb-8">
+            <div class="mb-8 text-center">
                 <h2 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
                     Hi, Lot.Butter Employee!
                 </h2>

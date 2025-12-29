@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('components', function (Blueprint $table) {
             $table->id();
             $table->string('code', 10)->unique();
+            $table->integer('safety_stock');
             $table->string('name', 50);
             $table->double('weight');
             $table->string('unit');

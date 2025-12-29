@@ -1,4 +1,4 @@
-@props(['active' => false])
+@props(['active' => false, 'icon' => 'heroicon-o-list-bullet', 'title' => ''])
 
 @php
     $classes = ($active ?? false)
@@ -7,5 +7,6 @@
 @endphp
 
 <a {{ $attributes->merge(['class' => $classes]) }}>
-    {{ $slot }}
+    @svg($icon, 'w-5 h-5 text-orange-400')
+    <span class="font-medium">{{ $title }}</span>
 </a>

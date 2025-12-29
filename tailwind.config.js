@@ -14,7 +14,7 @@ export default {
             fontFamily: {
                 sans: ["Figtree", ...defaultTheme.fontFamily.sans],
             },
-            color: {
+            colors: {
                 butter: {
                     50: "#fffbeb",
                     100: "#fef3c7",

@@ -4,62 +4,59 @@ namespace App\Http\Controllers;
 
 use App\Models\Component;
 use Illuminate\Http\Request;
+use App\Http\Requests\Component\CreateRequest;
+use App\Http\Requests\Component\UpdateRequest;
 
 class ComponentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $limit = $request->input('limit', 10);
+
+        $components = Component::query()
+            ->when(
+                $request->input('name'),
+                fn($query, $name) => $query->where('name', 'like', "%{$name}%"),
+            )
+            ->paginate($request->input('limit', $limit))
+            ->withQueryString();
+
+        return view('production.components.index', compact('components'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('production.components.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(CreateRequest $request)
     {
-        //
+        $validated = $request->validated();
+
+        Component::create($validated);
+        return to_route('employee.production.components.index')
+            ->with('success', 'Component created successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Component $component)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Component $component)
     {
-        //
+        return view('production.components.edit', compact('component'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Component $component)
+    public function update(UpdateRequest $request, Component $component)
     {
-        //
+        $validated = $request->validated();
+
+        $component->update($validated);
+        return to_route('employee.production.components.index')
+            ->with('success', 'Component updated successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Component $component)
     {
-        //
+        $component->delete();
+
+        return to_route('employee.production.components.index')
+            ->with('success', 'Component deleted successfully.');
     }
 }

@@ -11,9 +11,21 @@ use App\Http\Requests\Account\UpdateRequest;
 
 class AccountController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $accounts = User::with('employee.team')->whereHasRole('employee')->get();
+        $limit = $request->input('limit', 10);
+
+        $accounts = User::query()
+            ->with('employee.team')
+            ->whereHasRole('employee')
+            ->when($request->input('name'), function ($query, $name) {
+                $query->whereHas('employee', function ($q) use ($name) {
+                    $q->where('name', 'like', '%' . $name . '%');
+                });
+            })
+            ->paginate($limit)
+            ->withQueryString();
+
         return view('accounts.index', compact('accounts'));
     }
 

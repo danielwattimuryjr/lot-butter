@@ -10,9 +10,18 @@ use App\Models\Team;
 
 class EmployeeController extends Controller
 {
-  public function index()
+  public function index(Request $request)
   {
-    $employees = Employee::all();
+    $limit = $request->input('limit', 10);
+
+    $employees = Employee::query()
+      ->when(
+        $request->input('name'),
+        fn($query, $name) => $query->where('name', 'like', "%{$name}%"),
+      )
+      ->paginate($request->input('limit', $limit))
+      ->withQueryString();
+
     return view('employees.index', compact('employees'));
   }
 
