@@ -11,6 +11,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap');
         .font-handwritten { font-family: 'Caveat', cursive; }
     </style>
+    {!! ToastMagic::styles() !!}
 </head>
 <body class="antialiased bg-white overflow-x-hidden">
     <!-- Top Bar -->
@@ -44,6 +45,17 @@
         </main>
     </div>
 
+    {!! ToastMagic::scripts() !!}
+    @if (session('success'))
+        <script>
+            new ToastMagic().success("Success!!", "{{ session('success') }}")
+        </script>
+    @elseif (session('error'))
+        <script>
+            new ToastMagic().error("Error!", "{{ session('error') }}")
+        </script>
+    @endif
+    <script src="{{ asset('script/jquery-3.6.0.min.js') }}"></script>
     @stack('scripts')
 </body>
 </html>

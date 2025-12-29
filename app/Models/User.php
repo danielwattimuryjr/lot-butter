@@ -52,4 +52,9 @@ class User extends Authenticatable implements LaratrustUser
     {
         return $this->belongsTo(Employee::class);
     }
+
+    public function team()
+    {
+        return $this->hasOneThrough(Team::class, Employee::class, 'id', 'id', 'employee_id', 'team_id');
+    }
 }

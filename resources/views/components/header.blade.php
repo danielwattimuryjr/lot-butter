@@ -2,7 +2,7 @@
     @if (request()->routeIs('dashboard'))    
         <div>
             <h1 class="text-2xl lg:text-3xl font-bold text-gray-900">
-                Hi, {{ auth()->user()->name ?? 'User' }}!
+                Hi, {{ auth()->user()->employee ? auth()->user()->employee->name : auth()->user()->name }}!
             </h1>
             <p class="text-butter-500 font-medium mt-1">{{ auth()->user()->hasRole('admin') ? 'Admin' : auth()->user()->team->name }}</p>
             <p class="text-gray-600 mt-2">
