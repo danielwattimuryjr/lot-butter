@@ -32,4 +32,9 @@ class Product extends Model
     {
         return $this->hasMany(Journal::class);
     }
+
+    public function forecasts()
+    {
+        return $this->hasMany(Forecast::class);
+    }
 }

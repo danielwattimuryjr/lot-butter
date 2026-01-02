@@ -16,7 +16,7 @@
     <div class="flex items-center gap-3">
         <div class="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
             <img 
-                src="{{ $userAvatar ?? asset('images/avatar.jpg') }}" 
+                src="{{ $userAvatar ?? asset('images/avatar.jpeg') }}" 
                 alt="User Avatar"
                 class="w-full h-full object-cover"
             >

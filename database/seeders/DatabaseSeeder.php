@@ -18,8 +18,12 @@ class DatabaseSeeder extends Seeder
         $this->call([
             LaratrustSeeder::class,
             TeamSeeder::class,
-            EmployeeSeeder::class
+            EmployeeSeeder::class,
+            ProductSeeder::class,
         ]);
+
+        // Test Only
+        $this->call(IncomeSeeder::class);
 
         User::factory()->create([
             'name' => 'Admin',

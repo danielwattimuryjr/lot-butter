@@ -9,6 +9,7 @@ use App\Http\Controllers\ExportController;
 use App\Http\Controllers\IncomeController;
 use App\Http\Controllers\JournalController;
 use App\Http\Controllers\LogisticController;
+use App\Http\Controllers\MPSController;
 use App\Http\Controllers\ProcurementController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\TeamController;
@@ -47,6 +48,7 @@ Route::middleware(['auth'])->group(function () use ($exceptShow) {
                     Route::resource('components', ComponentController::class, $exceptShow);
                     Route::resource('products.bill-of-materials', BOMController::class, $exceptShow)
                         ->parameters(['bill-of-materials' => 'component']);
+                    Route::resource('products.master-production-schedule', MPSController::class, $exceptShow);
                 });
 
             Route::prefix('finance')

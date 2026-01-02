@@ -80,8 +80,11 @@
               @endif
               <td class="py-4 px-4 text-sm text-gray-700">
                 <a href="{{ route('employee.production.products.bill-of-materials.index', [$product]) }}" class="text-orange-400 hover:text-orange-600 transition-colors">
-                        BOM
-                      </a>
+                  BOM
+                </a>
+                <a href="{{ route('employee.production.products.master-production-schedule.index', [$product]) }}" class="text-orange-400 hover:text-orange-600 transition-colors ml-4">
+                  MPS
+                </a>
               </td>
             </tr>
           @empty

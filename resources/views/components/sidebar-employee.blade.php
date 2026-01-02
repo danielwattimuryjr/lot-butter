@@ -27,7 +27,6 @@
             <x-nav-item-dropdown title="Production" icon="heroicon-o-cog" :active="request()->routeIs('employee.production.*')">
                 <a href="{{ route('employee.production.components.index') }}" class="block py-2 text-gray-500 hover:text-gray-900 transition-colors">Component</a>
                 <a href="{{ route('employee.production.products.index') }}" class="block py-2 text-gray-500 hover:text-gray-900 transition-colors">Product</a>
-                <a href="#" class="block py-2 text-gray-500 hover:text-gray-900 transition-colors">MPS</a> 
                 <a href="#" class="block py-2 text-gray-500 hover:text-gray-900 transition-colors">MRP</a> 
             </x-nav-item-dropdown>
 
