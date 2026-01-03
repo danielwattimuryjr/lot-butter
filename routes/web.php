@@ -66,6 +66,24 @@ Route::middleware(['auth'])->group(function () use ($exceptShow) {
                     Route::put('master-production-schedules/{mps}', [MPSController::class, 'update'])
                         ->name('master-production-schedules.update');
 
+                    // Standalone MRP routes (multi-level)
+                    Route::get('material-requirements-planning', [MRPController::class, 'productSelector'])
+                        ->name('mrp.index');
+                    Route::get('material-requirements-planning/{product}', [MRPController::class, 'overview'])
+                        ->name('mrp.overview');
+                    Route::get('material-requirements-planning/{product}/level-0/{variant}', [MRPController::class, 'level0'])
+                        ->name('mrp.level0');
+                    Route::get('material-requirements-planning/{product}/level-1/product/{component}', [MRPController::class, 'level1Product'])
+                        ->name('mrp.level1-product');
+                    Route::get('material-requirements-planning/{product}/level-1/variant/{variant}/{component}', [MRPController::class, 'level1Variant'])
+                        ->name('mrp.level1-variant');
+                    Route::get('material-requirements-planning/{product}/level-2/{component}', [MRPController::class, 'level2'])
+                        ->name('mrp.level2');
+                    Route::get('material-requirements-planning/edit/{level}/{entityId}/{year}/{week}', [MRPController::class, 'edit'])
+                        ->name('mrp.edit');
+                    Route::post('material-requirements-planning', [MRPController::class, 'store'])
+                        ->name('mrp.store');
+
                     // Old nested MPS routes (kept for compatibility)
                     Route::get('products/{product}/master-production-schedule/export', [ExportController::class, 'exportMPS'])
                         ->name('products.master-production-schedule.export');

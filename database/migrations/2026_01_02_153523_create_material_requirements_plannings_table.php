@@ -13,17 +13,31 @@ return new class extends Migration
     {
         Schema::create('material_requirements_plannings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('component_id')->constrained()->onDelete('cascade');
+            $table->enum('level', ['0', '1', '2']);
+            $table->foreignId('product_id')->nullable()->constrained()->onDelete('cascade');
+            $table->foreignId('product_variant_id')->nullable()->constrained()->onDelete('cascade');
+            $table->foreignId('component_id')->nullable()->constrained()->onDelete('cascade');
             $table->year('year');
             $table->unsignedTinyInteger('week');
-            $table->unsignedTinyInteger('month');
-            $table->integer('gross_requirements')->nullable()->default(null);
-            $table->integer('schedule_receipts')->nullable()->default(null);
+            $table->integer('scheduled_receipts')->default(0);
             $table->integer('projected_on_hand')->default(0);
-            $table->integer('net_requirements')->nullable()->default(null);
-            $table->integer('planned_order_receipts')->nullable()->default(null);
-            $table->integer('planned_order_releases')->nullable()->default(null);
+            $table->integer('planned_order_receipts')->default(0);
+            $table->integer('planned_order_releases')->default(0);
+            $table->boolean('is_edited')->default(false);
             $table->timestamps();
+
+            // Unique constraints per level/entity/year/week
+            // Level 0: product_variant_id must be set
+            $table->unique(['level', 'product_variant_id', 'year', 'week'], 'mrp_level0_unique');
+
+            // Level 1 has two types:
+            // - Product-level: product_id + component_id
+            $table->unique(['level', 'product_id', 'component_id', 'year', 'week'], 'mrp_level1_product_unique');
+            // - Variant-level: product_variant_id + component_id
+            $table->unique(['level', 'product_variant_id', 'component_id', 'year', 'week'], 'mrp_level1_variant_unique');
+
+            // Level 2: product_id + component_id
+            $table->unique(['level', 'product_id', 'component_id', 'year', 'week'], 'mrp_level2_unique');
         });
     }
 
