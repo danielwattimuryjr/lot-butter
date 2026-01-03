@@ -10,6 +10,7 @@ use App\Http\Controllers\IncomeController;
 use App\Http\Controllers\JournalController;
 use App\Http\Controllers\LogisticController;
 use App\Http\Controllers\MPSController;
+use App\Http\Controllers\MRPController;
 use App\Http\Controllers\ProcurementController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\TeamController;
@@ -48,7 +49,18 @@ Route::middleware(['auth'])->group(function () use ($exceptShow) {
                     Route::resource('components', ComponentController::class, $exceptShow);
                     Route::resource('products.bill-of-materials', BOMController::class, $exceptShow)
                         ->parameters(['bill-of-materials' => 'component']);
+
+                    // MPS Export routes (must be before resource route)
+                    Route::get('products/{product}/master-production-schedule/export', [ExportController::class, 'exportMPS'])
+                        ->name('products.master-production-schedule.export');
+
                     Route::resource('products.master-production-schedule', MPSController::class, $exceptShow);
+
+                    // MRP Export routes (must be before resource route)
+                    Route::get('components/{component}/material-requirements-planning/export', [ExportController::class, 'exportMRP'])
+                        ->name('components.material-requirements-planning.export');
+
+                    Route::resource('components.material-requirements-planning', MRPController::class, $exceptShow);
                 });
 
             Route::prefix('finance')

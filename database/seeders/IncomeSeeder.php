@@ -11,10 +11,10 @@ class IncomeSeeder extends Seeder
 {
     public function run(): void
     {
-        $product = Product::first();
+        $products = Product::whereIn('id', [1, 2, 3])->get();
 
-        if (!$product) {
-            $this->command->error('Product not found');
+        if ($products->isEmpty()) {
+            $this->command->error('Products not found');
             return;
         }
 
@@ -23,32 +23,37 @@ class IncomeSeeder extends Seeder
         $weeks = $startDate->diffInWeeks($endDate);
 
         $baseQuantity = 50;
+        $incomeCounter = 1;
 
-        for ($i = 0; $i < $weeks; $i++) {
-            $date = $startDate->copy()->addWeeks($i);
-            $week = $date->weekOfYear;
-            $month = $date->month;
+        foreach ($products as $product) {
+            for ($i = 0; $i < $weeks; $i++) {
+                $date = $startDate->copy()->addWeeks($i);
+                $week = $date->weekOfYear;
+                $month = $date->month;
 
-            // 📈 tren naik perlahan
-            $trend = $baseQuantity + ($i * 2);
+                // 📈 tren naik perlahan
+                $trend = $baseQuantity + ($i * 2);
 
-            // 🎄 seasonality Desember
-            $seasonal = ($month == 12) ? rand(20, 40) : rand(-10, 10);
+                // 🎄 seasonality Desember
+                $seasonal = ($month == 12) ? rand(20, 40) : rand(-10, 10);
 
-            $quantity = max(10, $trend + $seasonal);
-            $unitPrice = $product->price;
-            $amount = $quantity * $unitPrice;
+                $quantity = max(10, $trend + $seasonal);
+                $unitPrice = $product->price;
+                $amount = $quantity * $unitPrice;
 
-            Income::create([
-                'code' => 'INC-' . str_pad($i + 1, 4, '0', STR_PAD_LEFT),
-                'product_id' => $product->id,
-                'description' => 'Penjualan minggu ke-' . $week,
-                'quantity' => $quantity,
-                'unit_price' => $unitPrice,
-                'amount' => $amount,
-                'date_received' => $date->toDateString(),
-                'week' => $week,
-            ]);
+                Income::create([
+                    'code' => 'INC-' . str_pad($incomeCounter, 4, '0', STR_PAD_LEFT),
+                    'product_id' => $product->id,
+                    'description' => 'Penjualan minggu ke-' . $week . ' - ' . $product->name,
+                    'quantity' => $quantity,
+                    'unit_price' => $unitPrice,
+                    'amount' => $amount,
+                    'date_received' => $date->toDateString(),
+                    'week' => $week,
+                ]);
+
+                $incomeCounter++;
+            }
         }
     }
 }

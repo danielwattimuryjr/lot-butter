@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\DB;
 class MasterProductionSchedule extends Model
 {
     protected $fillable = [
+        'product_id',
         'forecast_id',
+        'forecast_value',
         'mps_value',
         'available',
         'projected_on_hand',
@@ -21,6 +23,7 @@ class MasterProductionSchedule extends Model
 
     protected $casts = [
         'is_edited' => 'boolean',
+        'forecast_value' => 'integer',
         'mps_value' => 'integer',
         'available' => 'integer',
         'projected_on_hand' => 'integer',
@@ -30,26 +33,19 @@ class MasterProductionSchedule extends Model
     ];
 
     /**
-     * Relationship with Forecast
+     * Relationship with Product
+     */
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+    /**
+     * Relationship with Forecast (optional, for legacy reference)
      */
     public function forecast(): BelongsTo
     {
         return $this->belongsTo(Forecast::class);
-    }
-
-    /**
-     * Get product through forecast relationship
-     */
-    public function product()
-    {
-        return $this->hasOneThrough(
-            Product::class,
-            Forecast::class,
-            'id',
-            'id',
-            'forecast_id',
-            'product_id'
-        );
     }
 
     /**
@@ -105,9 +101,11 @@ class MasterProductionSchedule extends Model
     {
         $month = $updatedMps->month;
         $year = $updatedMps->year;
+        $product_id = $updatedMps->product_id;
 
-        // Get all MPS records for this month (including First Stock and regular weeks)
-        $monthMps = static::where('year', $year)
+        // Get all MPS records for this month and product (including First Stock and regular weeks)
+        $monthMps = static::where('product_id', $product_id)
+            ->where('year', $year)
             ->where('month', $month)
             ->orderBy('week')
             ->get();
@@ -115,7 +113,8 @@ class MasterProductionSchedule extends Model
         if ($monthMps->isEmpty()) return;
 
         // Get previous month's last availability to start the chain
-        $prevMonthLastMps = static::where('year', $year)
+        $prevMonthLastMps = static::where('product_id', $product_id)
+            ->where('year', $year)
             ->where('month', '<', $month)
             ->orderBy('month', 'desc')
             ->orderBy('week', 'desc')
@@ -139,8 +138,8 @@ class MasterProductionSchedule extends Model
                         'mps_value' => null
                     ]);
             } else {
-                // Regular forecast week
-                $forecast_value = $mps->forecast ? $mps->forecast->forecast_value : 0;
+                // Regular forecast week - use forecast_value from MPS record itself
+                $forecast_value = $mps->forecast_value ?? 0;
 
                 // MPS = current_week_forecast - last_week_projected_on_hand
                 $mps_value = $forecast_value - $prev_projected_on_hand;
@@ -163,20 +162,24 @@ class MasterProductionSchedule extends Model
         }
 
         // Now recalculate all subsequent months
-        static::recalculateSubsequentMonths($year, $month);
+        static::recalculateSubsequentMonths($year, $month, $product_id);
     }
 
     /**
      * Recalculate all months after the changed month
      */
-    protected static function recalculateSubsequentMonths($year, $changedMonth)
+    protected static function recalculateSubsequentMonths($year, $changedMonth, $product_id)
     {
-        // Get all subsequent months
-        $subsequentMps = static::where(function ($query) use ($year, $changedMonth) {
-            $query->where('year', $year)
-                ->where('month', '>', $changedMonth);
-        })
-            ->orWhere('year', '>', $year)
+        // Get all subsequent months for this product
+        $subsequentMps = static::where('product_id', $product_id)
+            ->where(function ($query) use ($year, $changedMonth) {
+                $query->where('year', $year)
+                    ->where('month', '>', $changedMonth);
+            })
+            ->orWhere(function ($query) use ($year, $product_id) {
+                $query->where('product_id', $product_id)
+                    ->where('year', '>', $year);
+            })
             ->orderBy('year')
             ->orderBy('month')
             ->orderBy('week')
@@ -185,7 +188,8 @@ class MasterProductionSchedule extends Model
         if ($subsequentMps->isEmpty()) return;
 
         // Get last availability from changed month
-        $lastMpsOfChangedMonth = static::where('year', $year)
+        $lastMpsOfChangedMonth = static::where('product_id', $product_id)
+            ->where('year', $year)
             ->where('month', $changedMonth)
             ->whereNotNull('forecast_id')
             ->orderBy('week', 'desc')
@@ -200,7 +204,8 @@ class MasterProductionSchedule extends Model
             if ($current_month !== $mps->month) {
                 // Reset prev_projected_on_hand at start of new month
                 // Use First Stock row if exists
-                $firstStock = static::where('year', $mps->year)
+                $firstStock = static::where('product_id', $mps->product_id)
+                    ->where('year', $mps->year)
                     ->where('month', $mps->month)
                     ->whereNull('forecast_id')
                     ->first();
@@ -216,7 +221,8 @@ class MasterProductionSchedule extends Model
             // Skip First Stock rows in recalculation
             if (is_null($mps->forecast_id)) continue;
 
-            $forecast_value = $mps->forecast ? $mps->forecast->forecast_value : 0;
+            // Use forecast_value from MPS record itself
+            $forecast_value = $mps->forecast_value ?? 0;
 
             // MPS = current_week_forecast - last_week_projected_on_hand
             $mps_value = $forecast_value - $prev_projected_on_hand;
@@ -242,8 +248,9 @@ class MasterProductionSchedule extends Model
      */
     protected static function recalculateAvailabilityChain($updatedMps)
     {
-        // Only recalculate subsequent weeks, not the whole month
-        $allMps = static::where('year', '>=', $updatedMps->year)
+        // Only recalculate subsequent weeks for this product, not the whole month
+        $allMps = static::where('product_id', $updatedMps->product_id)
+            ->where('year', '>=', $updatedMps->year)
             ->where(function ($query) use ($updatedMps) {
                 $query->where('year', '>', $updatedMps->year)
                     ->orWhere(function ($q) use ($updatedMps) {
@@ -272,7 +279,8 @@ class MasterProductionSchedule extends Model
                 // Check if we're entering a new month
                 if ($current_month !== $mps->month) {
                     // Reset for new month using First Stock if exists
-                    $firstStock = static::where('year', $mps->year)
+                    $firstStock = static::where('product_id', $mps->product_id)
+                        ->where('year', $mps->year)
                         ->where('month', $mps->month)
                         ->whereNull('forecast_id')
                         ->first();
@@ -288,7 +296,8 @@ class MasterProductionSchedule extends Model
                 // Skip First Stock rows
                 if (is_null($mps->forecast_id)) continue;
 
-                $forecast_value = $mps->forecast ? $mps->forecast->forecast_value : 0;
+                // Use forecast_value from MPS record itself
+                $forecast_value = $mps->forecast_value ?? 0;
 
                 // MPS = current_week_forecast - last_week_projected_on_hand
                 $mps_value = $forecast_value - $prev_projected_on_hand;
@@ -327,10 +336,7 @@ class MasterProductionSchedule extends Model
      */
     public function scopeForProduct($query, int $productId)
     {
-        return $query->where('year', $productId)
-            ->orWhereHas('forecast', function ($q) use ($productId) {
-                $q->where('product_id', $productId);
-            });
+        return $query->where('product_id', $productId);
     }
 
     /**
@@ -346,19 +352,15 @@ class MasterProductionSchedule extends Model
      */
     public function scopeForYear($query, int $year)
     {
-        return $query->whereHas('forecast', function ($q) use ($year) {
-            $q->where('year', $year);
-        });
+        return $query->where('year', $year);
     }
 
     /**
      * Scope to get MPS for a specific month
      */
-    public function scopeForMonth($query, string $month)
+    public function scopeForMonth($query, int $month)
     {
-        return $query->whereHas('forecast', function ($q) use ($month) {
-            $q->where('month', $month);
-        });
+        return $query->where('month', $month);
     }
 
     /**
@@ -383,7 +385,7 @@ class MasterProductionSchedule extends Model
      */
     public function getWeekLabelAttribute(): string
     {
-        return "Week {$this->forecast->week}";
+        return "Week {$this->week}";
     }
 
     /**
@@ -391,7 +393,7 @@ class MasterProductionSchedule extends Model
      */
     public function getPeriodAttribute(): string
     {
-        return "{$this->forecast->month} {$this->forecast->year} - Week {$this->forecast->week}";
+        return "Month {$this->month} {$this->year} - Week {$this->week}";
     }
 
     /**

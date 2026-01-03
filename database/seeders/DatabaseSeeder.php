@@ -20,6 +20,8 @@ class DatabaseSeeder extends Seeder
             TeamSeeder::class,
             EmployeeSeeder::class,
             ProductSeeder::class,
+            ComponentSeeder::class,
+            BOMSeeder::class,
         ]);
 
         // Test Only

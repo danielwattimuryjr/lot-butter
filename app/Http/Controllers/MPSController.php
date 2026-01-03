@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Forecast;
 use App\Models\MasterProductionSchedule;
 use App\Models\Product;
 use Carbon\Carbon;
@@ -18,8 +17,7 @@ class MPSController extends Controller
         $currentMonth = $todayDate->month;
         $currentYear = $todayDate->year;
 
-        $masterProductionSchedule = MasterProductionSchedule::with('forecast')
-            ->where('month', $currentMonth)
+        $masterProductionSchedule = MasterProductionSchedule::where('month', $currentMonth)
             ->where('year', $currentYear)
             ->orderBy('week')
             ->get();
@@ -28,7 +26,7 @@ class MPSController extends Controller
 
         foreach ($masterProductionSchedule as $mps) {
             $monthlyData[$mps->week] = [
-                'forecasting' => number_format($mps->forecast->forecast_value ?? 0),
+                'forecasting' => number_format($mps->forecast_value ?? 0),
                 'mps' => $mps->mps_value,
                 'available' => $mps->available,
                 'projected_on_hand' => $mps->projected_on_hand,

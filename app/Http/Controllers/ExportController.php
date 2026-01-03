@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Exports\AccountsExport;
 use App\Exports\ComponentsExport;
+use App\Exports\MasterProductionScheduleExport;
+use App\Exports\MaterialRequirementsPlanningExport;
+use App\Models\Component;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\EmployeesExport;
@@ -43,5 +47,47 @@ class ExportController extends Controller
         };
 
         return Excel::download(new $exportClass, $filename, $excelFormat);
+    }
+
+    public function exportMPS(Request $request, Product $product)
+    {
+        $format = $request->input('format', 'xlsx');
+        $month = $request->input('month', now()->month);
+        $year = $request->input('year', now()->year);
+
+        $filename = date('U') . '-mps-' . $product->name . '-' . $month . '-' . $year . '.' . $format;
+
+        $excelFormat = match ($format) {
+            'csv' => \Maatwebsite\Excel\Excel::CSV,
+            'pdf' => \Maatwebsite\Excel\Excel::DOMPDF,
+            default => \Maatwebsite\Excel\Excel::XLSX
+        };
+
+        return Excel::download(
+            new MasterProductionScheduleExport($product->id, $month, $year),
+            $filename,
+            $excelFormat
+        );
+    }
+
+    public function exportMRP(Request $request, Component $component)
+    {
+        $format = $request->input('format', 'xlsx');
+        $month = $request->input('month', now()->month);
+        $year = $request->input('year', now()->year);
+
+        $filename = date('U') . '-mrp-' . $component->name . '-' . $month . '-' . $year . '.' . $format;
+
+        $excelFormat = match ($format) {
+            'csv' => \Maatwebsite\Excel\Excel::CSV,
+            'pdf' => \Maatwebsite\Excel\Excel::DOMPDF,
+            default => \Maatwebsite\Excel\Excel::XLSX
+        };
+
+        return Excel::download(
+            new MaterialRequirementsPlanningExport($component->id, $month, $year),
+            $filename,
+            $excelFormat
+        );
     }
 }
