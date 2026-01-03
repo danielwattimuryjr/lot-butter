@@ -45,7 +45,7 @@
                 </a>
                 <a
                     href="{{ route("employee.production.products.index") }}"
-                    class="{{ request()->routeIs("employee.production.products.*") ? "bg-orange-50 font-medium text-orange-600" : "text-gray-500 hover:bg-gray-50 hover:text-gray-900" }} block rounded-lg px-3 py-2 transition-colors"
+                    class="{{ request()->routeIs("employee.production.products.*") && ! request()->routeIs("employee.production.master-production-schedules.*") ? "bg-orange-50 font-medium text-orange-600" : "text-gray-500 hover:bg-gray-50 hover:text-gray-900" }} block rounded-lg px-3 py-2 transition-colors"
                 >
                     Product
                 </a>
@@ -54,6 +54,12 @@
                     class="{{ request()->routeIs("employee.production.bill-of-materials.*") ? "bg-orange-50 font-medium text-orange-600" : "text-gray-500 hover:bg-gray-50 hover:text-gray-900" }} block rounded-lg px-3 py-2 transition-colors"
                 >
                     Bill of Materials
+                </a>
+                <a
+                    href="{{ route("employee.production.master-production-schedules.index") }}"
+                    class="{{ request()->routeIs("employee.production.master-production-schedules.*") ? "bg-orange-50 font-medium text-orange-600" : "text-gray-500 hover:bg-gray-50 hover:text-gray-900" }} block rounded-lg px-3 py-2 transition-colors"
+                >
+                    Master Production Schedule
                 </a>
             </x-nav-item-dropdown>
 

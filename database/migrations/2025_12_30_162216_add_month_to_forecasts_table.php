@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('forecasts', function (Blueprint $table) {
-            $table->unsignedTinyInteger('month')->after('week');
-        });
+        // Schema::table('forecasts', function (Blueprint $table) {
+        //     $table->unsignedTinyInteger('month')->after('week');
+        // });
     }
 
     /**
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('forecasts', function (Blueprint $table) {
-            $table->dropColumn('month');
-        });
+        // Schema::table('forecasts', function (Blueprint $table) {
+        //     $table->dropColumn('month');
+        // });
     }
 };

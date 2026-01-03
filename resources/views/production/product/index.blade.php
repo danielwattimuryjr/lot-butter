@@ -58,8 +58,6 @@
                             @if (auth()->user()->team->name == "Production")
                                 <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Actions</th>
                             @endif
-
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-600"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -125,16 +123,6 @@
                                         </div>
                                     </td>
                                 @endif
-
-                                <td class="px-4 py-4 text-sm text-gray-700">
-                                    <a
-                                        href="{{ route("employee.production.products.master-production-schedule.index", [$product]) }}"
-                                        class="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 transition-colors hover:bg-blue-200"
-                                    >
-                                        <x-heroicon-o-calendar class="h-3.5 w-3.5" />
-                                        MPS
-                                    </a>
-                                </td>
                             </tr>
                             <tr id="variants-{{ $product->id }}" class="hidden bg-gray-50">
                                 <td

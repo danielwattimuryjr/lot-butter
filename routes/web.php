@@ -50,10 +50,25 @@ Route::middleware(['auth'])->group(function () use ($exceptShow) {
                     Route::resource('bill-of-materials', BOMController::class, $exceptShow)
                         ->parameters(['bill-of-materials' => 'bom']);
 
-                    // MPS Export routes (must be before resource route)
+                    // Standalone MPS routes (separate from products)
+                    Route::get('master-production-schedules', [MPSController::class, 'productSelector'])
+                        ->name('master-production-schedules.index');
+                    Route::get('master-production-schedules/{product}', [MPSController::class, 'variantSelector'])
+                        ->name('master-production-schedules.show');
+                    Route::get('master-production-schedules/{product}/variant/{variant}', [MPSController::class, 'index'])
+                        ->name('master-production-schedules.variant');
+                    Route::get('master-production-schedules/{product}/variant/{variant}/edit/{year}/{week}', [MPSController::class, 'editWeek'])
+                        ->name('master-production-schedules.edit-week');
+                    Route::post('master-production-schedules', [MPSController::class, 'store'])
+                        ->name('master-production-schedules.store');
+                    Route::post('master-production-schedules/weekly', [MPSController::class, 'storeWeekly'])
+                        ->name('master-production-schedules.store-weekly');
+                    Route::put('master-production-schedules/{mps}', [MPSController::class, 'update'])
+                        ->name('master-production-schedules.update');
+
+                    // Old nested MPS routes (kept for compatibility)
                     Route::get('products/{product}/master-production-schedule/export', [ExportController::class, 'exportMPS'])
                         ->name('products.master-production-schedule.export');
-
                     Route::resource('products.master-production-schedule', MPSController::class, $exceptShow);
 
                     // MRP Export routes (must be before resource route)

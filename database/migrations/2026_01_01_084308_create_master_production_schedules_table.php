@@ -13,15 +13,17 @@ return new class extends Migration
     {
         Schema::create('master_production_schedules', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('forecast_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('product_variant_id')->constrained()->cascadeOnDelete();
             $table->year('year');
-            $table->unsignedTinyInteger('week');
             $table->unsignedTinyInteger('month');
-            $table->integer('mps_value')->nullable()->default(null);
-            $table->integer('available')->nullable()->default(null);
-            $table->integer('projected_on_hand')->default(0);
+            $table->unsignedTinyInteger('week')->default(0);
+            $table->integer('beginning_inventory')->default(0);
+            $table->integer('projected_on_hand')->nullable();
+            $table->integer('available')->nullable();
             $table->boolean('is_edited')->default(false);
             $table->timestamps();
+
+            $table->unique(['product_variant_id', 'year', 'week']);
         });
     }
 
