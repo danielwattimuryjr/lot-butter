@@ -2,12 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Employee;
+use App\Models\Team;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use App\Models\Team;
-use App\Models\Employee;
-use App\Models\User;
 
 class EmployeeSeeder extends Seeder
 {
@@ -49,7 +48,7 @@ class EmployeeSeeder extends Seeder
             // Create user account for the employee
             User::create([
                 'employee_id' => $employee->id,
-                'username' => 'user.' . $teamName,
+                'username' => 'user.'.$teamName,
                 'password' => Hash::make('password'),
             ])->addRole('employee');
         }

@@ -19,7 +19,7 @@ class LogisticController extends Controller
             ->with(['component'])
             ->when(
                 $request->input('name'),
-                fn($query, $name) => $query->whereHas('component', function ($q) use ($name) {
+                fn ($query, $name) => $query->whereHas('component', function ($q) use ($name) {
                     $q->where('name', 'like', "%{$name}%");
                 })
             )
@@ -54,7 +54,7 @@ class LogisticController extends Controller
 
             return back()
                 ->withInput()
-                ->with('error', 'Failed to create logistic entry: ' . $e->getMessage());
+                ->with('error', 'Failed to create logistic entry: '.$e->getMessage());
         }
     }
 
@@ -96,7 +96,7 @@ class LogisticController extends Controller
 
             return back()
                 ->withInput()
-                ->with('error', 'Failed to update logistic entry: ' . $e->getMessage());
+                ->with('error', 'Failed to update logistic entry: '.$e->getMessage());
         }
     }
 
@@ -158,7 +158,7 @@ class LogisticController extends Controller
             DB::rollBack();
 
             return back()
-                ->with('error', 'Failed to delete logistic entry: ' . $e->getMessage());
+                ->with('error', 'Failed to delete logistic entry: '.$e->getMessage());
         }
     }
 }

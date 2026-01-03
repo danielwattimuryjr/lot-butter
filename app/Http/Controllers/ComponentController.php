@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Component;
-use Illuminate\Http\Request;
 use App\Http\Requests\Component\CreateRequest;
 use App\Http\Requests\Component\UpdateRequest;
+use App\Models\Component;
+use Illuminate\Http\Request;
 
 class ComponentController extends Controller
 {
@@ -16,7 +16,7 @@ class ComponentController extends Controller
         $components = Component::query()
             ->when(
                 $request->input('name'),
-                fn($query, $name) => $query->where('name', 'like', "%{$name}%"),
+                fn ($query, $name) => $query->where('name', 'like', "%{$name}%"),
             )
             ->paginate($request->input('limit', $limit))
             ->withQueryString();
@@ -42,6 +42,7 @@ class ComponentController extends Controller
         $validated = $request->validated();
 
         Component::create($validated);
+
         return to_route('employee.production.components.index')
             ->with('success', 'Component created successfully.');
     }
@@ -56,6 +57,7 @@ class ComponentController extends Controller
         $validated = $request->validated();
 
         $component->update($validated);
+
         return to_route('employee.production.components.index')
             ->with('success', 'Component updated successfully.');
     }

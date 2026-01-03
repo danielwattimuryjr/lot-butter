@@ -7,7 +7,7 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class TeamsExport implements FromCollection, WithHeadings, ShouldAutoSize
+class TeamsExport implements FromCollection, ShouldAutoSize, WithHeadings
 {
     /**
      * @return \Illuminate\Support\Collection

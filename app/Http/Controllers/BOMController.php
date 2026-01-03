@@ -19,12 +19,13 @@ class BOMController extends Controller
         $search = $request->input('search');
 
         // If no product selected, show product selector
-        if (!$productId) {
+        if (! $productId) {
             $products = Product::query()
                 ->when($search, function ($query, $search) {
-                    $query->where('name', 'like', '%' . $search . '%');
+                    $query->where('name', 'like', '%'.$search.'%');
                 })
                 ->get();
+
             return view('production.bill_of_material.select', compact('products', 'search'));
         }
 
@@ -50,7 +51,7 @@ class BOMController extends Controller
         $productId = $request->input('product');
         $variantId = $request->input('variant_id');
 
-        if (!$productId) {
+        if (! $productId) {
             return redirect()->route('employee.production.products.index')
                 ->with('error', 'Please select a product first.');
         }
@@ -81,7 +82,7 @@ class BOMController extends Controller
 
         return redirect()->route('employee.production.bill-of-materials.index', [
             'product' => $productId,
-            'variant_id' => $variantId
+            'variant_id' => $variantId,
         ])->with('success', 'Components successfully added to BOM');
     }
 
@@ -91,7 +92,7 @@ class BOMController extends Controller
         $productId = $request->input('product');
         $variantId = $request->input('variant_id');
 
-        if (!$productId) {
+        if (! $productId) {
             return redirect()->route('employee.production.products.index')
                 ->with('error', 'Please select a product first.');
         }
@@ -119,7 +120,7 @@ class BOMController extends Controller
 
         return redirect()->route('employee.production.bill-of-materials.index', [
             'product' => $productId,
-            'variant_id' => $variantId
+            'variant_id' => $variantId,
         ])->with('success', 'Bill of Material updated successfully');
     }
 
@@ -133,7 +134,7 @@ class BOMController extends Controller
 
         return redirect()->route('employee.production.bill-of-materials.index', [
             'product' => $productId,
-            'variant_id' => $variantId
+            'variant_id' => $variantId,
         ])->with('success', 'Component successfully removed from BOM');
     }
 }

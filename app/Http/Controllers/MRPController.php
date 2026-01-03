@@ -22,7 +22,7 @@ class MRPController extends Controller
                 return [
                     'month' => $item->month,
                     'year' => $item->year,
-                    'label' => Carbon::create($item->year, $item->month)->format('F Y')
+                    'label' => Carbon::create($item->year, $item->month)->format('F Y'),
                 ];
             });
 

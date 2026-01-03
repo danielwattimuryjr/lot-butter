@@ -4,19 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Exports\AccountsExport;
 use App\Exports\ComponentsExport;
-use App\Exports\MasterProductionScheduleExport;
-use App\Exports\MaterialRequirementsPlanningExport;
-use App\Models\Component;
-use App\Models\Product;
-use Illuminate\Http\Request;
-use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\EmployeesExport;
 use App\Exports\IncomesExport;
 use App\Exports\JournalsExport;
 use App\Exports\LogisticsExport;
+use App\Exports\MasterProductionScheduleExport;
+use App\Exports\MaterialRequirementsPlanningExport;
 use App\Exports\ProcurementsExport;
 use App\Exports\ProductsExport;
 use App\Exports\TeamsExport;
+use App\Models\Component;
+use App\Models\Product;
+use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ExportController extends Controller
 {
@@ -38,7 +38,7 @@ class ExportController extends Controller
             default => abort(404, 'Resource not found')
         };
 
-        $filename = date('U') . '-' . $resource . '.' . $format;
+        $filename = date('U').'-'.$resource.'.'.$format;
 
         $excelFormat = match ($format) {
             'csv' => \Maatwebsite\Excel\Excel::CSV,
@@ -55,7 +55,7 @@ class ExportController extends Controller
         $month = $request->input('month', now()->month);
         $year = $request->input('year', now()->year);
 
-        $filename = date('U') . '-mps-' . $product->name . '-' . $month . '-' . $year . '.' . $format;
+        $filename = date('U').'-mps-'.$product->name.'-'.$month.'-'.$year.'.'.$format;
 
         $excelFormat = match ($format) {
             'csv' => \Maatwebsite\Excel\Excel::CSV,
@@ -76,7 +76,7 @@ class ExportController extends Controller
         $month = $request->input('month', now()->month);
         $year = $request->input('year', now()->year);
 
-        $filename = date('U') . '-mrp-' . $component->name . '-' . $month . '-' . $year . '.' . $format;
+        $filename = date('U').'-mrp-'.$component->name.'-'.$month.'-'.$year.'.'.$format;
 
         $excelFormat = match ($format) {
             'csv' => \Maatwebsite\Excel\Excel::CSV,

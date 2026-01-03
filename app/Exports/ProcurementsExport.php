@@ -7,7 +7,7 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class ProcurementsExport implements FromCollection, WithHeadings, ShouldAutoSize
+class ProcurementsExport implements FromCollection, ShouldAutoSize, WithHeadings
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -24,7 +24,7 @@ class ProcurementsExport implements FromCollection, WithHeadings, ShouldAutoSize
                 'total_amount' => $purchase->total_amount,
                 'date' => $purchase->date,
                 'week' => $purchase->week,
-                'supplier' => $purchase->supplier
+                'supplier' => $purchase->supplier,
             ];
         });
     }
@@ -40,7 +40,7 @@ class ProcurementsExport implements FromCollection, WithHeadings, ShouldAutoSize
             'Total Amount',
             'Date',
             'Week',
-            'Supplier'
+            'Supplier',
         ];
     }
 }

@@ -7,7 +7,7 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class ComponentsExport implements FromCollection, WithHeadings, ShouldAutoSize
+class ComponentsExport implements FromCollection, ShouldAutoSize, WithHeadings
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -20,7 +20,7 @@ class ComponentsExport implements FromCollection, WithHeadings, ShouldAutoSize
             'name',
             'weight',
             'unit',
-            'category'
+            'category',
         ]);
     }
 
@@ -32,7 +32,7 @@ class ComponentsExport implements FromCollection, WithHeadings, ShouldAutoSize
             'Name',
             'Weight',
             'Unit',
-            'Category'
+            'Category',
         ];
     }
 }

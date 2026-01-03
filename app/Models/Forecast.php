@@ -61,9 +61,9 @@ class Forecast extends Model
         static::updated(function (Forecast $forecast) {
             if ($forecast->isDirty('forecast_value') && $forecast->mps) {
                 $mps = $forecast->mps;
-                
+
                 // Only auto-update if not manually edited
-                if (!$mps->is_edited) {
+                if (! $mps->is_edited) {
                     $mps->mps_value = $forecast->forecast_value - $mps->projected_on_hand;
                     $mps->save();
                 }

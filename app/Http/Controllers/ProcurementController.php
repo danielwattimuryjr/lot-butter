@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Procurement\CreateRequest;
 use App\Http\Requests\Procurement\UpdateRequest;
+use App\Models\Component;
 use App\Models\Purchase;
 use Illuminate\Http\Request;
-use App\Models\Component;
 use Illuminate\Support\Facades\DB;
 
 class ProcurementController extends Controller
@@ -19,7 +19,7 @@ class ProcurementController extends Controller
             ->with(['component'])
             ->when(
                 $request->input('name'),
-                fn($query, $name) => $query->whereHas('component', function ($q) use ($name) {
+                fn ($query, $name) => $query->whereHas('component', function ($q) use ($name) {
                     $q->where('name', 'like', "%{$name}%");
                 }),
             )
@@ -32,6 +32,7 @@ class ProcurementController extends Controller
     public function create()
     {
         $components = Component::get(['id', 'name']);
+
         return view('supply-chain.procurement.create', compact('components'));
     }
 
@@ -50,13 +51,14 @@ class ProcurementController extends Controller
 
             return back()
                 ->withInput()
-                ->with('error', 'Failed to create procurement entry: ' . $e->getMessage());
+                ->with('error', 'Failed to create procurement entry: '.$e->getMessage());
         }
     }
 
     public function edit(Purchase $purchase)
     {
         $components = Component::get(['id', 'name']);
+
         return view('supply-chain.procurement.edit', compact('components', 'purchase'));
     }
 
@@ -68,6 +70,7 @@ class ProcurementController extends Controller
             $purchase->update($validated);
 
             DB::commit();
+
             return to_route('employee.supply-chain.procurements.index')
                 ->with('success', 'Purchase updated successfully');
         } catch (\Exception $e) {
@@ -75,7 +78,7 @@ class ProcurementController extends Controller
 
             return back()
                 ->withInput()
-                ->with('error', 'Failed to update procurement entry: ' . $e->getMessage());
+                ->with('error', 'Failed to update procurement entry: '.$e->getMessage());
         }
     }
 
@@ -86,6 +89,7 @@ class ProcurementController extends Controller
             $purchase->delete();
 
             DB::commit();
+
             return to_route('employee.supply-chain.procurements.index')
                 ->with('success', 'Purchase deleted successfully');
         } catch (\Exception $e) {
@@ -93,7 +97,7 @@ class ProcurementController extends Controller
 
             return back()
                 ->withInput()
-                ->with('error', 'Failed to delete procurement entry: ' . $e->getMessage());
+                ->with('error', 'Failed to delete procurement entry: '.$e->getMessage());
         }
     }
 }

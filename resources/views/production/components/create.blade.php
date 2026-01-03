@@ -88,7 +88,7 @@
                         required
                     />
                     <datalist id="category-list">
-                        @foreach($categories as $category)
+                        @foreach ($categories as $category)
                             <option value="{{ $category }}">{{ $category }}</option>
                         @endforeach
                     </datalist>

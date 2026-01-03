@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use App\Models\Employee;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\Account\CreateRequest;
 use App\Http\Requests\Account\UpdateRequest;
+use App\Models\Employee;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class AccountController extends Controller
 {
@@ -20,7 +20,7 @@ class AccountController extends Controller
             ->whereHasRole('employee')
             ->when($request->input('name'), function ($query, $name) {
                 $query->whereHas('employee', function ($q) use ($name) {
-                    $q->where('name', 'like', '%' . $name . '%');
+                    $q->where('name', 'like', '%'.$name.'%');
                 });
             })
             ->paginate($limit)
@@ -32,6 +32,7 @@ class AccountController extends Controller
     public function create()
     {
         $employees = Employee::doesntHave('user')->get();
+
         return view('accounts.create', compact('employees'));
     }
 
@@ -55,6 +56,7 @@ class AccountController extends Controller
         $employees = Employee::whereDoesntHave('user')
             ->orWhere('id', $user->employee_id)
             ->get();
+
         return view('accounts.edit', compact('user', 'employees'));
     }
 
@@ -62,7 +64,7 @@ class AccountController extends Controller
     {
         $data = $request->validated();
 
-        if (!empty($data['password'])) {
+        if (! empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         } else {
             unset($data['password']);

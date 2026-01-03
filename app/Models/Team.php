@@ -8,7 +8,7 @@ class Team extends Model
 {
     protected $fillable = [
         'name',
-        'description'
+        'description',
     ];
 
     public function employees()

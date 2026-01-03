@@ -26,7 +26,7 @@ class CreateRequest extends FormRequest
             'name' => ['required', 'string'],
             'phone_number' => ['nullable', 'string', 'digits:12'],
             'nip' => ['required', 'string', 'digits:11', 'unique:employees,nip'],
-            'team_id' => ['required', 'exists:teams,id']
+            'team_id' => ['required', 'exists:teams,id'],
         ];
     }
 }

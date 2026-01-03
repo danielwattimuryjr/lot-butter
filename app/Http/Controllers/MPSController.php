@@ -53,10 +53,12 @@ class MPSController extends Controller
 
             $master_production_schedule->update($validated);
             DB::commit();
+
             return to_route('employee.production.products.master-production-schedule.index', $product)
                 ->with('success', 'MPS updated successfully');
         } catch (Exception $th) {
             DB::rollBack();
+
             return back()->with('error', 'Failed to update MPS');
         }
     }

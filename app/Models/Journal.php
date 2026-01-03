@@ -33,7 +33,7 @@ class Journal extends Model
 
     public function reference()
     {
-        if (!$this->reference_table || !$this->reference_id) {
+        if (! $this->reference_table || ! $this->reference_id) {
             return null;
         }
 

@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Component;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class ComponentSeeder extends Seeder
@@ -90,7 +89,7 @@ class ComponentSeeder extends Seeder
                 'unit' => 'Pcs',
                 'category' => 'Packaging',
                 'safety_stock' => 150,
-            ]
+            ],
         ];
 
         foreach ($components as $component) {

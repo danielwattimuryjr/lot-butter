@@ -7,7 +7,7 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class EmployeesExport implements FromCollection, WithHeadings, ShouldAutoSize
+class EmployeesExport implements FromCollection, ShouldAutoSize, WithHeadings
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -30,7 +30,7 @@ class EmployeesExport implements FromCollection, WithHeadings, ShouldAutoSize
             'Name',
             'Phone Number',
             'NIP',
-            'Team'
+            'Team',
         ];
     }
 }

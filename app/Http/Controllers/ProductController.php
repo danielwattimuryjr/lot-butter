@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
-use Illuminate\Http\Request;
 use App\Http\Requests\Product\CreateRequest;
 use App\Http\Requests\Product\UpdateRequest;
+use App\Models\Product;
+use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
@@ -17,7 +17,7 @@ class ProductController extends Controller
             ->with('variants')
             ->when(
                 $request->input('name'),
-                fn($query, $name) => $query->where('name', 'like', "%{$name}%"),
+                fn ($query, $name) => $query->where('name', 'like', "%{$name}%"),
             )
             ->paginate($request->input('limit', $limit))
             ->withQueryString();

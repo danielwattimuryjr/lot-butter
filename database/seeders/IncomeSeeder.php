@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Product;
 use App\Models\Income;
+use App\Models\Product;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class IncomeSeeder extends Seeder
 {
@@ -15,6 +15,7 @@ class IncomeSeeder extends Seeder
 
         if ($products->isEmpty()) {
             $this->command->error('Products not found');
+
             return;
         }
 
@@ -42,9 +43,9 @@ class IncomeSeeder extends Seeder
                 $amount = $quantity * $unitPrice;
 
                 Income::create([
-                    'code' => 'INC-' . str_pad($incomeCounter, 4, '0', STR_PAD_LEFT),
+                    'code' => 'INC-'.str_pad($incomeCounter, 4, '0', STR_PAD_LEFT),
                     'product_id' => $product->id,
-                    'description' => 'Penjualan minggu ke-' . $week . ' - ' . $product->name,
+                    'description' => 'Penjualan minggu ke-'.$week.' - '.$product->name,
                     'quantity' => $quantity,
                     'unit_price' => $unitPrice,
                     'amount' => $amount,

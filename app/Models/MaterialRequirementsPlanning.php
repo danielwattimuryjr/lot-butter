@@ -99,6 +99,7 @@ class MaterialRequirementsPlanning extends Model
                 $startRecalculating = true;
                 // Use updated values
                 $prev_projected_on_hand = $updatedMrp->projected_on_hand;
+
                 continue;
             }
 
@@ -116,7 +117,7 @@ class MaterialRequirementsPlanning extends Model
                     ->update([
                         'net_requirements' => $net_requirements,
                         'projected_on_hand' => $projected_on_hand,
-                        'updated_at' => now()
+                        'updated_at' => now(),
                     ]);
 
                 $prev_projected_on_hand = $projected_on_hand;

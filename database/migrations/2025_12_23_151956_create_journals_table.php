@@ -22,7 +22,7 @@ return new class extends Migration
             $table->enum('transaction_type', [
                 'income',
                 'purchase',
-                'adjustment'
+                'adjustment',
             ]);
             $table->string('reference_table')->nullable();
             $table->unsignedBigInteger('reference_id')->nullable();

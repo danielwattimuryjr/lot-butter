@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use App\Services\JournalService;
-use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 
 class Income extends Model
 {
@@ -16,7 +16,7 @@ class Income extends Model
         'unit_price',
         'amount',
         'date_received',
-        'week'
+        'week',
     ];
 
     protected $casts = [
@@ -77,7 +77,8 @@ class Income extends Model
         $lastNumber = $lastIncome
             ? intval(substr($lastIncome->code, 3))
             : 0;
-        return 'INC' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+
+        return 'INC'.str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
     }
 
     public function product()

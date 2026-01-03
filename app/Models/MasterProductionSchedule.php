@@ -18,7 +18,7 @@ class MasterProductionSchedule extends Model
         'is_edited',
         'year',
         'week',
-        'month'
+        'month',
     ];
 
     protected $casts = [
@@ -110,7 +110,9 @@ class MasterProductionSchedule extends Model
             ->orderBy('week')
             ->get();
 
-        if ($monthMps->isEmpty()) return;
+        if ($monthMps->isEmpty()) {
+            return;
+        }
 
         // Get previous month's last availability to start the chain
         $prevMonthLastMps = static::where('product_id', $product_id)
@@ -135,7 +137,7 @@ class MasterProductionSchedule extends Model
                     ->where('id', $mps->id)
                     ->update([
                         'available' => null,
-                        'mps_value' => null
+                        'mps_value' => null,
                     ]);
             } else {
                 // Regular forecast week - use forecast_value from MPS record itself
@@ -152,7 +154,7 @@ class MasterProductionSchedule extends Model
                     ->where('id', $mps->id)
                     ->update([
                         'mps_value' => $mps_value,
-                        'available' => $available
+                        'available' => $available,
                     ]);
 
                 // Update trackers for next iteration
@@ -185,7 +187,9 @@ class MasterProductionSchedule extends Model
             ->orderBy('week')
             ->get();
 
-        if ($subsequentMps->isEmpty()) return;
+        if ($subsequentMps->isEmpty()) {
+            return;
+        }
 
         // Get last availability from changed month
         $lastMpsOfChangedMonth = static::where('product_id', $product_id)
@@ -219,7 +223,9 @@ class MasterProductionSchedule extends Model
             }
 
             // Skip First Stock rows in recalculation
-            if (is_null($mps->forecast_id)) continue;
+            if (is_null($mps->forecast_id)) {
+                continue;
+            }
 
             // Use forecast_value from MPS record itself
             $forecast_value = $mps->forecast_value ?? 0;
@@ -235,7 +241,7 @@ class MasterProductionSchedule extends Model
                 ->where('id', $mps->id)
                 ->update([
                     'mps_value' => $mps_value,
-                    'available' => $available
+                    'available' => $available,
                 ]);
 
             $prev_available = $available;
@@ -272,6 +278,7 @@ class MasterProductionSchedule extends Model
             if ($mps->id === $updatedMps->id) {
                 $startRecalculating = true;
                 $current_month = $mps->month;
+
                 continue;
             }
 
@@ -294,7 +301,9 @@ class MasterProductionSchedule extends Model
                 }
 
                 // Skip First Stock rows
-                if (is_null($mps->forecast_id)) continue;
+                if (is_null($mps->forecast_id)) {
+                    continue;
+                }
 
                 // Use forecast_value from MPS record itself
                 $forecast_value = $mps->forecast_value ?? 0;
@@ -309,7 +318,7 @@ class MasterProductionSchedule extends Model
                     ->where('id', $mps->id)
                     ->update([
                         'mps_value' => $mps_value,
-                        'available' => $available
+                        'available' => $available,
                     ]);
 
                 $prev_available = $available;
@@ -324,7 +333,7 @@ class MasterProductionSchedule extends Model
     protected static function recalculateAvailabilityAfterDelete($deletedMps)
     {
         // Simply recalculate the entire month and subsequent months
-        $dummyMps = new static();
+        $dummyMps = new static;
         $dummyMps->year = $deletedMps->year;
         $dummyMps->month = $deletedMps->month;
 

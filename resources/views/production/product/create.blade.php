@@ -18,7 +18,7 @@
                 <!-- Product Information -->
                 <div class="space-y-6">
                     <h2 class="text-lg font-semibold text-gray-900">Product Information</h2>
-                    
+
                     <div>
                         <label for="name" class="mb-2 block text-sm font-medium text-gray-900">Product Name</label>
                         <input
@@ -71,7 +71,7 @@
             const variantDiv = document.createElement('div');
             variantDiv.className = 'rounded-lg border border-gray-200 bg-gray-50 p-4 space-y-4';
             variantDiv.id = `variant-${variantCount}`;
-            
+
             variantDiv.innerHTML = `
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="font-medium text-gray-900">Variant ${variantCount + 1}</h3>
@@ -120,7 +120,7 @@
                     </div>
                 </div>
             `;
-            
+
             container.appendChild(variantDiv);
             variantCount++;
         }
@@ -133,7 +133,7 @@
         }
 
         // Add one variant by default
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             addVariant();
         });
     </script>

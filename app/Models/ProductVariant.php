@@ -12,7 +12,7 @@ class ProductVariant extends Model
         'product_id',
         'name',
         'number',
-        'price'
+        'price',
     ];
 
     protected $casts = [

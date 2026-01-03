@@ -23,7 +23,7 @@
                 <!-- Product Information -->
                 <div class="space-y-6">
                     <h2 class="text-lg font-semibold text-gray-900">Product Information</h2>
-                    
+
                     <div>
                         <label for="name" class="mb-2 block text-sm font-medium text-gray-900">Product Name</label>
                         <input
@@ -70,19 +70,19 @@
 
     <script>
         let variantCount = 0;
-        const existingVariants = @json(old('variants', $product->variants->toArray()));
+        const existingVariants = @json(old("variants", $product->variants->toArray()));
 
         function addVariant(variant = null) {
             const container = document.getElementById('variants-container');
             const variantDiv = document.createElement('div');
             variantDiv.className = 'rounded-lg border border-gray-200 bg-gray-50 p-4 space-y-4';
             variantDiv.id = `variant-${variantCount}`;
-            
+
             const variantId = variant?.id || '';
             const variantName = variant?.name || '';
             const variantNumber = variant?.number || '';
             const variantPrice = variant?.price || '';
-            
+
             variantDiv.innerHTML = `
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="font-medium text-gray-900">Variant ${variantCount + 1}</h3>
@@ -136,7 +136,7 @@
                     </div>
                 </div>
             `;
-            
+
             container.appendChild(variantDiv);
             variantCount++;
         }
@@ -149,9 +149,9 @@
         }
 
         // Load existing variants
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             if (existingVariants && existingVariants.length > 0) {
-                existingVariants.forEach(variant => {
+                existingVariants.forEach((variant) => {
                     addVariant(variant);
                 });
             } else {

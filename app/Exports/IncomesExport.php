@@ -7,7 +7,7 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class IncomesExport implements FromCollection, WithHeadings, ShouldAutoSize
+class IncomesExport implements FromCollection, ShouldAutoSize, WithHeadings
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -23,7 +23,7 @@ class IncomesExport implements FromCollection, WithHeadings, ShouldAutoSize
                 'unit_price' => $income->product->price,
                 'total_amount' => $income->amount,
                 'date_received' => $income->date_received,
-                'week' => $income->week
+                'week' => $income->week,
             ];
         });
     }
@@ -38,7 +38,7 @@ class IncomesExport implements FromCollection, WithHeadings, ShouldAutoSize
             'Unit Price',
             'Total Amount',
             'Date Received',
-            'Week'
+            'Week',
         ];
     }
 }

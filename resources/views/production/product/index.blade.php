@@ -113,12 +113,6 @@
 
                                 <td class="px-4 py-4 text-sm text-gray-700">
                                     <a
-                                        href="{{ route("employee.production.bill-of-materials.index", ["product" => $product->id]) }}"
-                                        class="text-orange-400 transition-colors hover:text-orange-600"
-                                    >
-                                        BOM
-                                    </a>
-                                    <a
                                         href="{{ route("employee.production.products.master-production-schedule.index", [$product]) }}"
                                         class="ml-4 text-orange-400 transition-colors hover:text-orange-600"
                                     >
