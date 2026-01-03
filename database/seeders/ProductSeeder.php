@@ -12,6 +12,8 @@ class ProductSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->command->info('Seeding products and variants...');
+
         $product = Product::create([
             'name' => 'Mochi Ichigo Daifuku',
         ]);
@@ -34,5 +36,8 @@ class ProductSeeder extends Seeder
                 'price' => 160000,
             ],
         ]);
+
+        $this->command->info('Created product: '.$product->name);
+        $this->command->info('Created '.$product->variants->count().' variants');
     }
 }

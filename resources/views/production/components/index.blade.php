@@ -7,6 +7,7 @@
         <!-- Page Title -->
         <div>
             <h1 class="text-xl font-bold text-gray-900">Components</h1>
+            <p class="mt-1 text-sm text-gray-600">Manage raw materials and component inventory</p>
             <div class="mt-2 border-b border-gray-200"></div>
         </div>
 
@@ -33,12 +34,12 @@
                     </a>
                 </div>
 
-                <!-- Add New Product Button -->
                 <a
                     href="{{ route("employee.production.components.create") }}"
-                    class="inline-flex items-center gap-2 rounded-lg border-2 border-orange-400 bg-transparent px-4 py-2 text-sm font-medium text-orange-400 transition-colors hover:bg-orange-50"
+                    class="inline-flex items-center gap-2 rounded-lg bg-butter-500 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-butter-600"
                 >
-                    ADD NEW COMPONENTS
+                    <x-heroicon-o-plus class="h-5 w-5" />
+                    Add New Component
                 </a>
             </div>
         @endif
@@ -48,17 +49,16 @@
             <x-table-controls />
 
             <!-- Table -->
-            <div class="overflow-x-auto">
+            <div class="mt-4 overflow-x-auto">
                 <table class="w-full">
                     <thead class="bg-gray-100">
                         <tr class="border-b border-gray-200">
                             <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">No.</th>
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Item Code</th>
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Component Name</th>
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Unit</th>
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Category</th>
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Safety Stock</th>
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Stock</th>
+                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Component</th>
+                            <th class="px-4 py-3 text-center text-sm font-medium text-gray-600">Unit</th>
+                            <th class="px-4 py-3 text-center text-sm font-medium text-gray-600">Category</th>
+                            <th class="px-4 py-3 text-center text-sm font-medium text-gray-600">Safety Stock</th>
+                            <th class="px-4 py-3 text-right text-sm font-medium text-gray-600">Current Stock</th>
                             @if (auth()->user()->team->name == "Production")
                                 <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Actions</th>
                             @endif
@@ -68,19 +68,71 @@
                     </thead>
                     <tbody>
                         @forelse ($components as $component)
-                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <tr class="border-b border-gray-100 transition-colors hover:bg-gray-50">
                                 <td class="px-4 py-4 text-sm text-gray-700">
                                     {{ $loop->iteration + ($components->currentPage() - 1) * $components->perPage() }}
                                 </td>
-                                <td class="px-4 py-4 text-sm text-gray-700">{{ $component->code }}</td>
-                                <td class="px-4 py-4 text-sm text-gray-700">{{ $component->name }}</td>
-                                <td class="px-4 py-4 text-sm text-gray-700">{{ $component->unit }}</td>
-                                <td class="px-4 py-4 text-sm text-gray-700">{{ $component->category }}</td>
-                                <td class="px-4 py-4 text-sm text-gray-700">
-                                    {{ number_format($component->safety_stock ?? 0) }}
+                                <td class="px-4 py-4 text-sm">
+                                    <div class="flex items-center gap-2">
+                                        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100">
+                                            <x-heroicon-o-cube class="h-4 w-4 text-purple-600" />
+                                        </div>
+                                        <div>
+                                            <div class="font-medium text-gray-900">{{ $component->name }}</div>
+                                            <div class="text-xs text-gray-500">{{ $component->code }}</div>
+                                        </div>
+                                    </div>
                                 </td>
-                                <td class="px-4 py-4 text-sm text-gray-700">
-                                    {{ number_format($component->stock ?? 0) }}
+                                <td class="px-4 py-4 text-center text-sm">
+                                    <span
+                                        class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700"
+                                    >
+                                        {{ $component->unit }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-4 text-center text-sm">
+                                    <span
+                                        class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700"
+                                    >
+                                        {{ $component->category }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-4 text-center text-sm">
+                                    <span
+                                        class="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800"
+                                    >
+                                        {{ number_format($component->safety_stock ?? 0) }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-4 text-right text-sm">
+                                    @php
+                                        $stock = $component->stock ?? 0;
+                                        $safetyStock = $component->safety_stock ?? 0;
+                                        $isLow = $stock <= $safetyStock;
+                                    @endphp
+
+                                    <div class="flex flex-col items-end gap-1">
+                                        <span
+                                            class="{{ $isLow ? "text-red-600" : "text-gray-900" }} text-lg font-bold"
+                                        >
+                                            {{ number_format($stock) }}
+                                        </span>
+                                        @if ($isLow && $stock > 0)
+                                            <span
+                                                class="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700"
+                                            >
+                                                <x-heroicon-o-exclamation-triangle class="h-3 w-3" />
+                                                Low Stock
+                                            </span>
+                                        @elseif ($stock == 0)
+                                            <span
+                                                class="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700"
+                                            >
+                                                <x-heroicon-o-x-circle class="h-3 w-3" />
+                                                Out of Stock
+                                            </span>
+                                        @endif
+                                    </div>
                                 </td>
                                 @if (auth()->user()->team->name == "Production")
                                     <td class="px-4 py-4">
@@ -95,6 +147,9 @@
                                                 method="POST"
                                                 action="{{ route("employee.production.components.destroy", $component) }}"
                                                 class="inline-flex items-center"
+                                                onsubmit="
+                                                    return confirm('Are you sure you want to delete this component?');
+                                                "
                                             >
                                                 @csrf
                                                 @method("DELETE")
@@ -102,6 +157,7 @@
                                                 <button
                                                     type="submit"
                                                     class="text-orange-400 transition-colors hover:text-red-600"
+                                                    title="Delete"
                                                 >
                                                     <x-heroicon-o-trash class="h-5 w-5" />
                                                 </button>
@@ -113,16 +169,34 @@
                                 <td class="px-4 py-4 text-sm text-gray-700">
                                     <a
                                         href="{{ route("employee.production.components.material-requirements-planning.index", $component) }}"
-                                        class="text-orange-400 transition-colors hover:text-orange-600"
+                                        class="inline-flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700 transition-colors hover:bg-green-200"
                                     >
+                                        <x-heroicon-o-calculator class="h-3.5 w-3.5" />
                                         MRP
                                     </a>
                                 </td>
                             </tr>
                         @empty
-                            <tr class="border-b border-gray-100 hover:bg-gray-50">
-                                <td colspan="9" class="px-4 py-8 text-center text-sm text-gray-500">
-                                    No components found.
+                            <tr class="border-b border-gray-100">
+                                <td colspan="8" class="px-4 py-12 text-center">
+                                    <div class="flex flex-col items-center justify-center">
+                                        <div class="rounded-full bg-gray-100 p-4">
+                                            <x-heroicon-o-cube class="h-12 w-12 text-gray-400" />
+                                        </div>
+                                        <p class="mt-4 text-sm font-medium text-gray-900">No components found</p>
+                                        <p class="mt-1 text-sm text-gray-500">
+                                            Add raw materials and components to start managing your inventory.
+                                        </p>
+                                        @if (auth()->user()->team->name == "Production")
+                                            <a
+                                                href="{{ route("employee.production.components.create") }}"
+                                                class="mt-4 inline-flex items-center gap-2 rounded-lg bg-butter-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-butter-600"
+                                            >
+                                                <x-heroicon-o-plus class="h-4 w-4" />
+                                                Add First Component
+                                            </a>
+                                        @endif
+                                    </div>
                                 </td>
                             </tr>
                         @endforelse

@@ -39,19 +39,19 @@
             >
                 <a
                     href="{{ route("employee.production.components.index") }}"
-                    class="block py-2 text-gray-500 transition-colors hover:text-gray-900"
+                    class="{{ request()->routeIs("employee.production.components.*") ? "bg-orange-50 font-medium text-orange-600" : "text-gray-500 hover:bg-gray-50 hover:text-gray-900" }} block rounded-lg px-3 py-2 transition-colors"
                 >
                     Component
                 </a>
                 <a
                     href="{{ route("employee.production.products.index") }}"
-                    class="block py-2 text-gray-500 transition-colors hover:text-gray-900"
+                    class="{{ request()->routeIs("employee.production.products.*") ? "bg-orange-50 font-medium text-orange-600" : "text-gray-500 hover:bg-gray-50 hover:text-gray-900" }} block rounded-lg px-3 py-2 transition-colors"
                 >
                     Product
                 </a>
                 <a
                     href="{{ route("employee.production.bill-of-materials.index") }}"
-                    class="block py-2 text-gray-500 transition-colors hover:text-gray-900"
+                    class="{{ request()->routeIs("employee.production.bill-of-materials.*") ? "bg-orange-50 font-medium text-orange-600" : "text-gray-500 hover:bg-gray-50 hover:text-gray-900" }} block rounded-lg px-3 py-2 transition-colors"
                 >
                     Bill of Materials
                 </a>
@@ -65,13 +65,13 @@
             >
                 <a
                     href="{{ route("employee.supply-chain.logistics.index") }}"
-                    class="block py-2 text-gray-500 transition-colors hover:text-gray-900"
+                    class="{{ request()->routeIs("employee.supply-chain.logistics.*") ? "bg-orange-50 font-medium text-orange-600" : "text-gray-500 hover:bg-gray-50 hover:text-gray-900" }} block rounded-lg px-3 py-2 transition-colors"
                 >
                     Logistic
                 </a>
                 <a
                     href="{{ route("employee.supply-chain.procurements.index") }}"
-                    class="block py-2 text-gray-500 transition-colors hover:text-gray-900"
+                    class="{{ request()->routeIs("employee.supply-chain.procurements.*") ? "bg-orange-50 font-medium text-orange-600" : "text-gray-500 hover:bg-gray-50 hover:text-gray-900" }} block rounded-lg px-3 py-2 transition-colors"
                 >
                     Procurement
                 </a>
@@ -85,13 +85,13 @@
             >
                 <a
                     href="{{ route("employee.finance.incomes.index") }}"
-                    class="block py-2 text-gray-500 transition-colors hover:text-gray-900"
+                    class="{{ request()->routeIs("employee.finance.incomes.*") ? "bg-orange-50 font-medium text-orange-600" : "text-gray-500 hover:bg-gray-50 hover:text-gray-900" }} block rounded-lg px-3 py-2 transition-colors"
                 >
                     Income
                 </a>
                 <a
                     href="{{ route("employee.finance.journals.index") }}"
-                    class="block py-2 text-gray-500 transition-colors hover:text-gray-900"
+                    class="{{ request()->routeIs("employee.finance.journals.*") ? "bg-orange-50 font-medium text-orange-600" : "text-gray-500 hover:bg-gray-50 hover:text-gray-900" }} block rounded-lg px-3 py-2 transition-colors"
                 >
                     Journal
                 </a>

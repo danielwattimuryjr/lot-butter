@@ -11,6 +11,7 @@ class Income extends Model
     protected $fillable = [
         'code',
         'product_id',
+        'product_variant_id',
         'description',
         'quantity',
         'unit_price',
@@ -36,10 +37,18 @@ class Income extends Model
 
             $income->week = Carbon::parse($income->date_received)->week;
 
-            $product = \App\Models\Product::find($income->product_id);
-
-            $income->unit_price = $product->price;
-            $income->amount = $income->quantity * $product->price;
+            // Get price from variant if variant_id exists, otherwise from product
+            if ($income->product_variant_id) {
+                $variant = \App\Models\ProductVariant::find($income->product_variant_id);
+                $income->unit_price = $variant->price;
+                $income->amount = $income->quantity * $variant->price;
+            } else {
+                $product = \App\Models\Product::find($income->product_id);
+                // Since product no longer has price, we need to handle this differently
+                // You might want to throw an error or require variant selection
+                $income->unit_price = 0;
+                $income->amount = 0;
+            }
         });
 
         static::created(function ($income) {
@@ -52,9 +61,12 @@ class Income extends Model
                 $income->week = Carbon::parse($income->date_received)->week;
             }
 
-            if ($income->isDirty('quantity')) {
-                $product = \App\Models\Product::find($income->product_id);
-                $income->amount = $income->quantity * $product->price;
+            if ($income->isDirty('quantity') || $income->isDirty('product_variant_id')) {
+                if ($income->product_variant_id) {
+                    $variant = \App\Models\ProductVariant::find($income->product_variant_id);
+                    $income->unit_price = $variant->price;
+                    $income->amount = $income->quantity * $variant->price;
+                }
             }
         });
 
@@ -84,6 +96,11 @@ class Income extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function productVariant()
+    {
+        return $this->belongsTo(ProductVariant::class);
     }
 
     public function journal()

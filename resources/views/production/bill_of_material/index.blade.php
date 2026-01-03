@@ -51,9 +51,10 @@
             <div class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                 <a
                     href="{{ route("employee.production.bill-of-materials.create", ["product" => $product->id, "variant_id" => request("variant_id")]) }}"
-                    class="inline-flex items-center gap-2 rounded-lg border-2 border-orange-400 bg-transparent px-4 py-2 text-sm font-medium text-orange-400 transition-colors hover:bg-orange-50"
+                    class="inline-flex items-center gap-2 rounded-lg bg-butter-500 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-butter-600"
                 >
-                    ADD COMPONENTS TO BOM
+                    <x-heroicon-o-plus class="h-5 w-5" />
+                    Add Components to BOM
                 </a>
             </div>
         @endif

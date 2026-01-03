@@ -22,10 +22,8 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,
             ComponentSeeder::class,
             BOMSeeder::class,
+            IncomeSeeder::class,
         ]);
-
-        // Test Only
-        // $this->call(IncomeSeeder::class);
 
         User::factory()->create([
             'name' => 'Admin',

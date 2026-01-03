@@ -16,11 +16,12 @@ class IncomeController extends Controller
         $limit = $request->input('limit', 10);
 
         $incomes = Income::query()
-            ->with(['product', 'journal'])
+            ->with(['product.variants', 'productVariant', 'journal'])
             ->when(
                 $request->input('name'),
                 fn ($query, $name) => $query->where('description', 'like', "%{$name}%"),
             )
+            ->orderBy('date_received', 'desc')
             ->paginate($request->input('limit', $limit))
             ->withQueryString();
 
@@ -29,7 +30,7 @@ class IncomeController extends Controller
 
     public function create()
     {
-        $products = Product::get(['id', 'name', 'pack']);
+        $products = Product::with('variants')->get(['id', 'name']);
 
         return view('finance.income.create', compact('products'));
     }
@@ -56,8 +57,8 @@ class IncomeController extends Controller
 
     public function edit(Income $income)
     {
-        $income = $income->load(['product', 'journal']);
-        $products = Product::get(['id', 'name', 'pack']);
+        $income = $income->load(['product.variants', 'productVariant', 'journal']);
+        $products = Product::with('variants')->get(['id', 'name']);
 
         return view('finance.income.edit', compact('income', 'products'));
     }

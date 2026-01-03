@@ -15,6 +15,8 @@ class EmployeeSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->command->info('Seeding employees and user accounts...');
+
         $teams = Team::pluck('id', 'name');
 
         $employees = [
@@ -52,5 +54,7 @@ class EmployeeSeeder extends Seeder
                 'password' => Hash::make('password'),
             ])->addRole('employee');
         }
+
+        $this->command->info('Created '.count($employees).' employees with user accounts');
     }
 }

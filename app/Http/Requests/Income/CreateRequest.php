@@ -25,9 +25,10 @@ class CreateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'product_id' => 'required|exists:products,id',
-            'description' => 'required|string|max:255',
-            'quantity' => 'required|numeric|min:1',
+            'product_id' => 'nullable|exists:products,id',
+            'product_variant_id' => 'required|exists:product_variants,id',
+            'description' => 'required|string',
+            'quantity' => 'required|integer|min:1',
             'date_received' => 'required|date',
         ];
     }

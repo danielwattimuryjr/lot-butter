@@ -12,6 +12,8 @@ class TeamSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->command->info('Seeding teams...');
+
         $teams = [
             [
                 'name' => 'Finance',
@@ -30,5 +32,7 @@ class TeamSeeder extends Seeder
         foreach ($teams as $team) {
             Team::create($team);
         }
+
+        $this->command->info('Created '.count($teams).' teams successfully');
     }
 }

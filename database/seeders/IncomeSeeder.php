@@ -11,50 +11,94 @@ class IncomeSeeder extends Seeder
 {
     public function run(): void
     {
-        $products = Product::whereIn('id', [1, 2, 3])->get();
+        // Get Mochi Ichigo Daifuku product and its variants
+        $product = Product::where('name', 'Mochi Ichigo Daifuku')->first();
 
-        if ($products->isEmpty()) {
-            $this->command->error('Products not found');
+        if (! $product) {
+            $this->command->error('Mochi Ichigo Daifuku product not found');
 
             return;
         }
 
-        $startDate = Carbon::create(2025, 1, 1);
-        $endDate = Carbon::create(2025, 10, 31)->endOfWeek(); // End of week 4 in October
-        $weeks = $startDate->diffInWeeks($endDate);
+        $variants = $product->variants;
 
-        $baseQuantity = 50;
-        $incomeCounter = 1;
+        if ($variants->isEmpty()) {
+            $this->command->error('No variants found for Mochi Ichigo Daifuku');
 
-        foreach ($products as $product) {
-            for ($i = 0; $i < $weeks; $i++) {
-                $date = $startDate->copy()->addWeeks($i);
-                $week = $date->weekOfYear;
-                $month = $date->month;
-
-                // 📈 tren naik perlahan
-                $trend = $baseQuantity + ($i * 2);
-
-                // 🎄 seasonality Desember
-                $seasonal = ($month == 12) ? rand(20, 40) : rand(-10, 10);
-
-                $quantity = max(10, $trend + $seasonal);
-                $unitPrice = $product->price;
-                $amount = $quantity * $unitPrice;
-
-                Income::create([
-                    'code' => 'INC-'.str_pad($incomeCounter, 4, '0', STR_PAD_LEFT),
-                    'product_id' => $product->id,
-                    'description' => 'Penjualan minggu ke-'.$week.' - '.$product->name,
-                    'quantity' => $quantity,
-                    'unit_price' => $unitPrice,
-                    'amount' => $amount,
-                    'date_received' => $date->toDateString(),
-                    'week' => $week,
-                ]);
-
-                $incomeCounter++;
-            }
+            return;
         }
+
+        // Actual quantities from January to October (40 weeks)
+        $quantities = [
+            4352,
+            4224,
+            4416,
+            4480,
+            4320,
+            4160,
+            4288,
+            4352,
+            4480,
+            4544,
+            4608,
+            4800,
+            7200,
+            7520,
+            6080,
+            5120,
+            4480,
+            4352,
+            4416,
+            4480,
+            4320,
+            4288,
+            4352,
+            4416,
+            4480,
+            4544,
+            4608,
+            4800,
+            6880,
+            6560,
+            5120,
+            4800,
+            4480,
+            4352,
+            4416,
+            4480,
+            4320,
+            4160,
+            4288,
+            4352,
+        ];
+
+        $startDate = Carbon::create(2025, 1, 6); // First Monday of 2025
+
+        foreach ($quantities as $index => $quantity) {
+            // Get date for this week
+            $date = $startDate->copy()->addWeeks($index);
+            $week = $date->weekOfYear;
+
+            // Randomly select a variant
+            $variant = $variants->random();
+
+            // Calculate amount based on variant price
+            $unitPrice = $variant->price;
+            $amount = $quantity * $unitPrice;
+
+            Income::create([
+                'code' => 'INC-'.str_pad($index + 1, 4, '0', STR_PAD_LEFT),
+                'product_id' => $product->id,
+                'product_variant_id' => $variant->id,
+                'description' => 'Penjualan minggu ke-'.$week.' - '.$product->name.' ('.$variant->name.')',
+                'quantity' => $quantity,
+                'unit_price' => $unitPrice,
+                'amount' => $amount,
+                'date_received' => $date->toDateString(),
+                'week' => $week,
+            ]);
+        }
+
+        $this->command->info('Created '.count($quantities).' income records for Mochi Ichigo Daifuku');
     }
 }

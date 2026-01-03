@@ -25,10 +25,11 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'product_id' => 'sometimes|exists:products,id',
-            'description' => 'sometimes|string|max:255',
-            'quantity' => 'sometimes|numeric|min:1',
-            'date_received' => 'sometimes|date',
+            'product_id' => 'nullable|exists:products,id',
+            'product_variant_id' => 'required|exists:product_variants,id',
+            'description' => 'required|string',
+            'quantity' => 'required|integer|min:1',
+            'date_received' => 'required|date',
         ];
     }
 }

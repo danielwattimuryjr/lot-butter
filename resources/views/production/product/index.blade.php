@@ -7,6 +7,7 @@
         <!-- Page Title -->
         <div>
             <h1 class="text-xl font-bold text-gray-900">Products</h1>
+            <p class="mt-1 text-sm text-gray-600">Manage products and their variants</p>
             <div class="mt-2 border-b border-gray-200"></div>
         </div>
 
@@ -33,12 +34,12 @@
                     </a>
                 </div>
 
-                <!-- Add New Product Button -->
                 <a
                     href="{{ route("employee.production.products.create") }}"
-                    class="inline-flex items-center gap-2 rounded-lg border-2 border-orange-400 bg-transparent px-4 py-2 text-sm font-medium text-orange-400 transition-colors hover:bg-orange-50"
+                    class="inline-flex items-center gap-2 rounded-lg bg-butter-500 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-butter-600"
                 >
-                    ADD NEW PRODUCT
+                    <x-heroicon-o-plus class="h-5 w-5" />
+                    Add New Product
                 </a>
             </div>
         @endif
@@ -48,7 +49,7 @@
             <x-table-controls />
 
             <!-- Table -->
-            <div class="overflow-x-auto">
+            <div class="mt-4 overflow-x-auto">
                 <table class="w-full">
                     <thead class="bg-gray-100">
                         <tr class="border-b border-gray-200">
@@ -63,23 +64,31 @@
                     </thead>
                     <tbody>
                         @forelse ($products as $product)
-                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <tr class="border-b border-gray-100 transition-colors hover:bg-gray-50">
                                 <td class="px-4 py-4 text-sm text-gray-700">
                                     {{ $loop->iteration + ($products->currentPage() - 1) * $products->perPage() }}
                                 </td>
-                                <td class="px-4 py-4 text-sm text-gray-700">
-                                    <div class="flex items-center gap-2">
+                                <td class="px-4 py-4 text-sm">
+                                    <div class="flex items-center gap-3">
                                         <button
                                             type="button"
                                             onclick="toggleVariants(event, {{ $product->id }})"
-                                            class="text-orange-400 transition-colors hover:text-orange-600"
+                                            class="text-butter-500 transition-colors hover:text-butter-600"
                                         >
                                             <x-heroicon-o-chevron-down
                                                 class="h-5 w-5 transition-transform"
                                                 id="icon-{{ $product->id }}"
                                             />
                                         </button>
-                                        <span>{{ $product->name }}</span>
+                                        <div
+                                            class="flex h-10 w-10 items-center justify-center rounded-lg bg-butter-100"
+                                        >
+                                            <x-heroicon-o-cube class="h-5 w-5 text-butter-600" />
+                                        </div>
+                                        <div>
+                                            <div class="font-medium text-gray-900">{{ $product->name }}</div>
+                                            <div class="text-xs text-gray-500">{{ $product->code }}</div>
+                                        </div>
                                     </div>
                                 </td>
 
@@ -96,6 +105,11 @@
                                                 method="POST"
                                                 action="{{ route("employee.production.products.destroy", $product) }}"
                                                 class="inline-flex items-center"
+                                                onsubmit="
+                                                    return confirm(
+                                                        'Are you sure you want to delete this product and all its variants?',
+                                                    );
+                                                "
                                             >
                                                 @csrf
                                                 @method("DELETE")
@@ -103,6 +117,7 @@
                                                 <button
                                                     type="submit"
                                                     class="text-orange-400 transition-colors hover:text-red-600"
+                                                    title="Delete"
                                                 >
                                                     <x-heroicon-o-trash class="h-5 w-5" />
                                                 </button>
@@ -114,8 +129,9 @@
                                 <td class="px-4 py-4 text-sm text-gray-700">
                                     <a
                                         href="{{ route("employee.production.products.master-production-schedule.index", [$product]) }}"
-                                        class="ml-4 text-orange-400 transition-colors hover:text-orange-600"
+                                        class="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 transition-colors hover:bg-blue-200"
                                     >
+                                        <x-heroicon-o-calendar class="h-3.5 w-3.5" />
                                         MPS
                                     </a>
                                 </td>
@@ -125,58 +141,95 @@
                                     colspan="@if(auth()->user()->team->name == 'Production') 4 @else 3 @endif"
                                     class="px-4 py-4"
                                 >
-                                    <div class="ml-8">
-                                        <h4 class="mb-3 text-sm font-semibold text-gray-700">Product Variants</h4>
+                                    <div class="ml-14">
+                                        <h4 class="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-700">
+                                            <x-heroicon-o-tag class="h-4 w-4" />
+                                            Product Variants
+                                        </h4>
                                         @if ($product->variants->count() > 0)
-                                            <table class="w-full">
-                                                <thead class="bg-white">
-                                                    <tr class="border-b border-gray-200">
-                                                        <th
-                                                            class="px-4 py-2 text-left text-xs font-medium text-gray-600"
-                                                        >
-                                                            Variant Name
-                                                        </th>
-                                                        <th
-                                                            class="px-4 py-2 text-left text-xs font-medium text-gray-600"
-                                                        >
-                                                            Number
-                                                        </th>
-                                                        <th
-                                                            class="px-4 py-2 text-left text-xs font-medium text-gray-600"
-                                                        >
-                                                            Price
-                                                        </th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @foreach ($product->variants as $variant)
+                                            <div class="rounded-lg border border-gray-200 bg-white">
+                                                <table class="w-full">
+                                                    <thead class="bg-gray-50">
                                                         <tr class="border-b border-gray-200">
-                                                            <td class="px-4 py-2 text-sm text-gray-600">
-                                                                {{ $variant->name }}
-                                                            </td>
-                                                            <td class="px-4 py-2 text-sm text-gray-600">
-                                                                {{ $variant->number }}
-                                                            </td>
-                                                            <td class="px-4 py-2 text-sm text-gray-600">
-                                                                {{ "Rp" . number_format($variant->price, 2) }}
-                                                            </td>
+                                                            <th
+                                                                class="px-4 py-2 text-left text-xs font-medium text-gray-600"
+                                                            >
+                                                                Variant Name
+                                                            </th>
+                                                            <th
+                                                                class="px-4 py-2 text-center text-xs font-medium text-gray-600"
+                                                            >
+                                                                Number
+                                                            </th>
+                                                            <th
+                                                                class="px-4 py-2 text-right text-xs font-medium text-gray-600"
+                                                            >
+                                                                Price
+                                                            </th>
                                                         </tr>
-                                                    @endforeach
-                                                </tbody>
-                                            </table>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach ($product->variants as $variant)
+                                                            <tr class="border-b border-gray-100 last:border-0">
+                                                                <td
+                                                                    class="px-4 py-2.5 text-sm font-medium text-gray-900"
+                                                                >
+                                                                    {{ $variant->name }}
+                                                                </td>
+                                                                <td class="px-4 py-2.5 text-center text-sm">
+                                                                    <span
+                                                                        class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700"
+                                                                    >
+                                                                        {{ $variant->number }}
+                                                                    </span>
+                                                                </td>
+                                                                <td
+                                                                    class="px-4 py-2.5 text-right text-sm font-semibold text-gray-900"
+                                                                >
+                                                                    Rp{{ number_format($variant->price, 0, ",", ".") }}
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                         @else
-                                            <p class="text-sm text-gray-500">No variants available for this product.</p>
+                                            <div
+                                                class="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3"
+                                            >
+                                                <x-heroicon-o-information-circle class="h-5 w-5 text-gray-400" />
+                                                <p class="text-sm text-gray-500">
+                                                    No variants available for this product.
+                                                </p>
+                                            </div>
                                         @endif
                                     </div>
                                 </td>
                             </tr>
                         @empty
-                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <tr class="border-b border-gray-100">
                                 <td
                                     colspan="@if(auth()->user()->team->name == 'Production') 4 @else 3 @endif"
-                                    class="px-4 py-8 text-center text-sm text-gray-500"
+                                    class="px-4 py-12 text-center"
                                 >
-                                    No products found.
+                                    <div class="flex flex-col items-center justify-center">
+                                        <div class="rounded-full bg-gray-100 p-4">
+                                            <x-heroicon-o-cube class="h-12 w-12 text-gray-400" />
+                                        </div>
+                                        <p class="mt-4 text-sm font-medium text-gray-900">No products found</p>
+                                        <p class="mt-1 text-sm text-gray-500">
+                                            Start managing your product catalog by adding your first product.
+                                        </p>
+                                        @if (auth()->user()->team->name == "Production")
+                                            <a
+                                                href="{{ route("employee.production.products.create") }}"
+                                                class="mt-4 inline-flex items-center gap-2 rounded-lg bg-butter-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-butter-600"
+                                            >
+                                                <x-heroicon-o-plus class="h-4 w-4" />
+                                                Add First Product
+                                            </a>
+                                        @endif
+                                    </div>
                                 </td>
                             </tr>
                         @endforelse

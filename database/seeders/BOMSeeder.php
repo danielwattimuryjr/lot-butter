@@ -11,8 +11,16 @@ class BOMSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->command->info('Creating Bill of Materials for Mochi Ichigo Daifuku...');
+
         // Find Mochi Ichigo Daifuku product
         $mochiIchigoProduct = \App\Models\Product::where('name', 'like', '%Mochi Ichigo Daifuku%')->first();
+
+        if (! $mochiIchigoProduct) {
+            $this->command->error('Mochi Ichigo Daifuku product not found');
+
+            return;
+        }
 
         if ($mochiIchigoProduct) {
             // Attach components with quantities and levels based on BOM structure
@@ -55,6 +63,11 @@ class BOMSeeder extends Seeder
                     1 => ['quantity' => 16, 'level' => 1],  // Mochi Ichigo Daifuku (Satuan) (FG-001)
                 ]);
             }
+
+            $this->command->info('✓ Created BOM for product-level components');
+            $this->command->info('✓ Created BOM for Isi 4 variant');
+            $this->command->info('✓ Created BOM for Isi 8 variant');
+            $this->command->info('✓ Created BOM for Isi 16 variant');
         }
     }
 }

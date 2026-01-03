@@ -12,6 +12,8 @@ class ComponentSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->command->info('Seeding components...');
+
         $components = [
             [
                 'code' => 'FG-001',
@@ -95,5 +97,7 @@ class ComponentSeeder extends Seeder
         foreach ($components as $component) {
             Component::create($component);
         }
+
+        $this->command->info('Created '.count($components).' components successfully');
     }
 }
