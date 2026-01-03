@@ -7,7 +7,7 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class ProductsExport implements FromCollection, WithHeadings, ShouldAutoSize
+class ProductsExport implements FromCollection, ShouldAutoSize, WithHeadings
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -22,7 +22,7 @@ class ProductsExport implements FromCollection, WithHeadings, ShouldAutoSize
         return [
             'Name',
             'Pack',
-            'Price'
+            'Price',
         ];
     }
 }

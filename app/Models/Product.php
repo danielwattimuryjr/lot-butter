@@ -4,13 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
 {
     protected $fillable = [
+        'product_code',
         'name',
-        'pack',
-        'price'
     ];
 
     /**
@@ -18,9 +18,18 @@ class Product extends Model
      */
     public function components(): BelongsToMany
     {
-        return $this->belongsToMany(Component::class, 'bills_of_materials')
+        return $this->belongsToMany(Component::class, 'bill_of_materials')
             ->using(BillOfMaterial::class)
-            ->withPivot('quantity');
+            ->wherePivotNull('product_variant_id')
+            ->withPivot(['quantity', 'level', 'id']);
+    }
+
+    /**
+     * Get the variants for the product.
+     */
+    public function variants(): HasMany
+    {
+        return $this->hasMany(ProductVariant::class);
     }
 
     public function incomes()

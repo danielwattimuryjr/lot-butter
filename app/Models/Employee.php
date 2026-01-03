@@ -10,7 +10,7 @@ class Employee extends Model
         'name',
         'phone_number',
         'nip',
-        'team_id'
+        'team_id',
     ];
 
     public function team()

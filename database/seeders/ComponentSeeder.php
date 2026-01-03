@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Component;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class ComponentSeeder extends Seeder
@@ -13,31 +12,88 @@ class ComponentSeeder extends Seeder
      */
     public function run(): void
     {
-        Component::create([
-            'code' => 'BB-05',
-            'name' => 'Filling Cream',
-            'weight' => 20,
-            'unit' => 'Kg',
-            'safety_stock' => 10,
-            'category' => 'Dairy Product',
-        ]);
+        $components = [
+            [
+                'code' => 'FG-001',
+                'name' => 'Mochi Ichigo Daifuku',
+                'unit' => 'Pcs',
+                'category' => 'Finished Goods',
+                'safety_stock' => 50,
+            ],
+            [
+                'code' => 'FWS-001',
+                'name' => 'Tepung Ketan',
+                'unit' => 'Kg',
+                'category' => 'Flour, Wheat, Sugar',
+                'safety_stock' => 100,
+            ],
+            [
+                'code' => 'FWS-002',
+                'name' => 'Gula Pasir',
+                'unit' => 'Kg',
+                'category' => 'Flour, Wheat, Sugar',
+                'safety_stock' => 80,
+            ],
+            [
+                'code' => 'ING-001',
+                'name' => 'Fresh Strawberry',
+                'unit' => 'Kg',
+                'category' => 'Ingredients',
+                'safety_stock' => 30,
+            ],
+            [
+                'code' => 'FWS-003',
+                'name' => 'Tepung Maizena',
+                'unit' => 'Kg',
+                'category' => 'Flour, Wheat, Sugar',
+                'safety_stock' => 50,
+            ],
+            [
+                'code' => 'DRY-001',
+                'name' => 'Dairy Product',
+                'unit' => 'Kg',
+                'category' => 'Dairy Product',
+                'safety_stock' => 40,
+            ],
+            [
+                'code' => 'PKG-001',
+                'name' => 'Paper Case',
+                'unit' => 'Pcs',
+                'category' => 'Packaging',
+                'safety_stock' => 500,
+            ],
+            [
+                'code' => 'PKG-002',
+                'name' => 'Box Packaging (Small)',
+                'unit' => 'Pcs',
+                'category' => 'Packaging',
+                'safety_stock' => 200,
+            ],
+            [
+                'code' => 'PKG-003',
+                'name' => 'Sticker Label',
+                'unit' => 'Pcs',
+                'category' => 'Packaging',
+                'safety_stock' => 1000,
+            ],
+            [
+                'code' => 'PKG-004',
+                'name' => 'Box Packaging (Large)',
+                'unit' => 'Pcs',
+                'category' => 'Packaging',
+                'safety_stock' => 150,
+            ],
+            [
+                'code' => 'PKG-005',
+                'name' => 'Box Packaging (Medium)',
+                'unit' => 'Pcs',
+                'category' => 'Packaging',
+                'safety_stock' => 150,
+            ],
+        ];
 
-        Component::create([
-            'code' => 'BB-01',
-            'name' => 'Tepung Ketan',
-            'weight' => 20,
-            'unit' => 'Kg',
-            'safety_stock' => 10,
-            'category' => 'Flour,Wheat,Grain',
-        ]);
-
-        Component::create([
-            'code' => 'PK-01',
-            'name' => 'Paper Case',
-            'weight' => 1,
-            'unit' => 'Pcs',
-            'safety_stock' => 10,
-            'category' => 'Packaging',
-        ]);
+        foreach ($components as $component) {
+            Component::create($component);
+        }
     }
 }

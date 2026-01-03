@@ -7,7 +7,7 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class LogisticsExport implements FromCollection, WithHeadings, ShouldAutoSize
+class LogisticsExport implements FromCollection, ShouldAutoSize, WithHeadings
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -21,7 +21,7 @@ class LogisticsExport implements FromCollection, WithHeadings, ShouldAutoSize
                 'type' => $logistic->transaction_type,
                 'date' => $logistic->date,
                 'quantity' => $logistic->quantity,
-                'total' => $logistic->stock_total
+                'total' => $logistic->stock_total,
             ];
         });
     }
@@ -34,7 +34,7 @@ class LogisticsExport implements FromCollection, WithHeadings, ShouldAutoSize
             'Type',
             'Date',
             'Quantity',
-            'Stock Total'
+            'Stock Total',
         ];
     }
 }

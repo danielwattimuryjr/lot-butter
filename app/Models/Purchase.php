@@ -16,7 +16,7 @@ class Purchase extends Model
         'unit_price',
         'total_amount',
         'date',
-        'supplier'
+        'supplier',
     ];
 
     protected $casts = [
@@ -72,7 +72,8 @@ class Purchase extends Model
         $lastNumber = $lastPurchase
             ? intval(substr($lastPurchase->code, 3))
             : 0;
-        return 'PUR' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+
+        return 'PUR'.str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
     }
 
     public function component()

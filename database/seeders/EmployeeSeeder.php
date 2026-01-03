@@ -2,10 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use App\Models\Team;
 use App\Models\Employee;
+use App\Models\Team;
+use App\Models\User;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class EmployeeSeeder extends Seeder
 {
@@ -37,8 +38,19 @@ class EmployeeSeeder extends Seeder
             ],
         ];
 
-        foreach ($employees as $employee) {
-            Employee::create($employee);
+        foreach ($employees as $employeeData) {
+            // Create the employee
+            $employee = Employee::create($employeeData);
+
+            // Get the team name for the username
+            $teamName = Team::find($employee->team_id)->name;
+
+            // Create user account for the employee
+            User::create([
+                'employee_id' => $employee->id,
+                'username' => 'user.'.$teamName,
+                'password' => Hash::make('password'),
+            ])->addRole('employee');
         }
     }
 }

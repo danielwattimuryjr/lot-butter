@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Income\CreateRequest;
 use App\Http\Requests\Income\UpdateRequest;
-use Illuminate\Http\Request;
 use App\Models\Income;
 use App\Models\Product;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class IncomeController extends Controller
@@ -19,7 +19,7 @@ class IncomeController extends Controller
             ->with(['product', 'journal'])
             ->when(
                 $request->input('name'),
-                fn($query, $name) => $query->where('description', 'like', "%{$name}%"),
+                fn ($query, $name) => $query->where('description', 'like', "%{$name}%"),
             )
             ->paginate($request->input('limit', $limit))
             ->withQueryString();
@@ -43,13 +43,14 @@ class IncomeController extends Controller
             Income::create($validated);
 
             DB::commit();
+
             return to_route('employee.finance.incomes.index')->with('success', 'Income created successfully');
         } catch (\Exception $e) {
             DB::rollBack();
 
             return back()
                 ->withInput()
-                ->with('error', 'Failed to create income entry: ' . $e->getMessage());
+                ->with('error', 'Failed to create income entry: '.$e->getMessage());
         }
     }
 
@@ -70,13 +71,14 @@ class IncomeController extends Controller
             $income->update($validated);
 
             DB::commit();
+
             return to_route('employee.finance.incomes.index')->with('success', 'Income updated successfully');
         } catch (\Exception $e) {
             DB::rollBack();
 
             return back()
                 ->withInput()
-                ->with('error', 'Failed to update income entry: ' . $e->getMessage());
+                ->with('error', 'Failed to update income entry: '.$e->getMessage());
         }
     }
 
@@ -87,13 +89,14 @@ class IncomeController extends Controller
             $income->delete();
 
             DB::commit();
+
             return to_route('employee.finance.incomes.index')->with('success', 'Income deleted successfully');
         } catch (\Exception $e) {
             DB::rollBack();
 
             return back()
                 ->withInput()
-                ->with('error', 'Failed to delete income entry: ' . $e->getMessage());
+                ->with('error', 'Failed to delete income entry: '.$e->getMessage());
         }
     }
 }

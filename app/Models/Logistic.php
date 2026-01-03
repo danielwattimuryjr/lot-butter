@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class Logistic extends Model
@@ -41,7 +40,7 @@ class Logistic extends Model
 
         static::created(function ($logistic) {
             $logistic->component->update([
-                'stock' => $logistic->stock_total
+                'stock' => $logistic->stock_total,
             ]);
         });
 
@@ -71,7 +70,8 @@ class Logistic extends Model
         $lastNumber = $lastLogistic
             ? intval(substr($lastLogistic->code, 3))
             : 0;
-        return 'LOG' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+
+        return 'LOG'.str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
     }
 
     protected static function getLastStockTotal($componentId)

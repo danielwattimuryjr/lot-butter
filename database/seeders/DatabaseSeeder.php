@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Test Only
-        $this->call(IncomeSeeder::class);
+        // $this->call(IncomeSeeder::class);
 
         User::factory()->create([
             'name' => 'Admin',

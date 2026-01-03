@@ -14,7 +14,7 @@ class Component extends Model
         'name',
         'weight',
         'unit',
-        'category'
+        'category',
     ];
 
     protected $casts = [

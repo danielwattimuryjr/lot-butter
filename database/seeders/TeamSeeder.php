@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Team;
+use Illuminate\Database\Seeder;
 
 class TeamSeeder extends Seeder
 {
@@ -16,16 +15,16 @@ class TeamSeeder extends Seeder
         $teams = [
             [
                 'name' => 'Finance',
-                'description' => 'Manages financial transactions'
+                'description' => 'Manages financial transactions',
             ],
             [
                 'name' => 'Procurement',
-                'description' => 'Manages purchasing activities'
+                'description' => 'Manages purchasing activities',
             ],
             [
                 'name' => 'Production',
-                'description' => 'Executes manufacturing processes'
-            ]
+                'description' => 'Executes manufacturing processes',
+            ],
         ];
 
         foreach ($teams as $team) {

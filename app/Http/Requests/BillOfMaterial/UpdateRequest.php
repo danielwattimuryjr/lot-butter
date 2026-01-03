@@ -4,7 +4,6 @@ namespace App\Http\Requests\BillOfMaterial;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 
 class UpdateRequest extends FormRequest
 {
@@ -25,19 +24,10 @@ class UpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        $productId = $this->route('product')->id;
-        $componentId = $this->route('component')->id;
-
         return [
-            'component_id' => [
-                'required',
-                'exists:components,id',
-                Rule::unique('bills_of_materials', 'component_id')
-                    ->where('product_id', $productId)
-                    ->ignore($componentId, 'component_id')
-                    ->where('product_id', $productId)
-            ],
-            'quantity' => 'required|decimal:1,4|min:0',
+            'component_id' => 'required|exists:components,id',
+            'quantity' => 'required|numeric|min:0',
+            'level' => 'required|in:0,1,2',
         ];
     }
 }

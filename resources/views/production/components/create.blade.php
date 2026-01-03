@@ -81,10 +81,17 @@
                         type="text"
                         id="category"
                         name="category"
+                        list="category-list"
                         value="{{ old("category") }}"
                         class="w-full rounded-lg border-0 bg-gray-100 px-4 py-3 outline-none transition-all focus:bg-white focus:ring-2 focus:ring-butter-400"
+                        autocomplete="off"
                         required
                     />
+                    <datalist id="category-list">
+                        @foreach ($categories as $category)
+                            <option value="{{ $category }}">{{ $category }}</option>
+                        @endforeach
+                    </datalist>
                     @error("category")
                         <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                     @enderror

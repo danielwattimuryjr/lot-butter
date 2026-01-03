@@ -7,7 +7,7 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class JournalsExport implements FromCollection, WithHeadings, ShouldAutoSize
+class JournalsExport implements FromCollection, ShouldAutoSize, WithHeadings
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -20,7 +20,7 @@ class JournalsExport implements FromCollection, WithHeadings, ShouldAutoSize
             'description',
             'debit',
             'credit',
-            'balance'
+            'balance',
         ]);
     }
 
@@ -32,7 +32,7 @@ class JournalsExport implements FromCollection, WithHeadings, ShouldAutoSize
             'Description',
             'Debit',
             'Credit',
-            'Balance'
+            'Balance',
         ];
     }
 }

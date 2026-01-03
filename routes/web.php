@@ -47,8 +47,8 @@ Route::middleware(['auth'])->group(function () use ($exceptShow) {
                 ->group(function () use ($exceptShow) {
                     Route::resource('products', ProductController::class, $exceptShow);
                     Route::resource('components', ComponentController::class, $exceptShow);
-                    Route::resource('products.bill-of-materials', BOMController::class, $exceptShow)
-                        ->parameters(['bill-of-materials' => 'component']);
+                    Route::resource('bill-of-materials', BOMController::class, $exceptShow)
+                        ->parameters(['bill-of-materials' => 'bom']);
 
                     // MPS Export routes (must be before resource route)
                     Route::get('products/{product}/master-production-schedule/export', [ExportController::class, 'exportMPS'])

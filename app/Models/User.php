@@ -12,7 +12,7 @@ use Laratrust\Traits\HasRolesAndPermissions;
 class User extends Authenticatable implements LaratrustUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRolesAndPermissions;
+    use HasFactory, HasRolesAndPermissions, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -23,7 +23,7 @@ class User extends Authenticatable implements LaratrustUser
         'name',
         'username',
         'password',
-        'employee_id'
+        'employee_id',
     ];
 
     /**

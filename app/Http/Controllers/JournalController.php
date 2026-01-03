@@ -14,7 +14,7 @@ class JournalController extends Controller
         $journals = Journal::query()
             ->when(
                 $request->input('name'),
-                fn($query, $name) => $query->where('description', 'like', "%{$name}%"),
+                fn ($query, $name) => $query->where('description', 'like', "%{$name}%"),
             )
             ->latest('created_at')
             ->paginate($request->input('limit', $limit))
