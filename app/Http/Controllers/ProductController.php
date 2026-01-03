@@ -14,6 +14,7 @@ class ProductController extends Controller
         $limit = $request->input('limit', 10);
 
         $products = Product::query()
+            ->with('variants')
             ->when(
                 $request->input('name'),
                 fn($query, $name) => $query->where('name', 'like', "%{$name}%"),
@@ -33,7 +34,19 @@ class ProductController extends Controller
     {
         $validated = $request->validated();
 
-        Product::create($validated);
+        // Create the product
+        $product = Product::create([
+            'name' => $validated['name'],
+        ]);
+
+        // Create the variants
+        foreach ($validated['variants'] as $variantData) {
+            $product->variants()->create([
+                'name' => $variantData['name'],
+                'number' => $variantData['number'],
+                'price' => $variantData['price'],
+            ]);
+        }
 
         return to_route('employee.production.products.index')
             ->with('success', 'Product created successfully.');
@@ -48,7 +61,40 @@ class ProductController extends Controller
     {
         $validated = $request->validated();
 
-        $product->update($validated);
+        // Update the product
+        $product->update([
+            'name' => $validated['name'],
+        ]);
+
+        // Get existing variant IDs
+        $existingVariantIds = [];
+
+        // Update or create variants
+        foreach ($validated['variants'] as $variantData) {
+            if (isset($variantData['id'])) {
+                // Update existing variant
+                $variant = $product->variants()->find($variantData['id']);
+                if ($variant) {
+                    $variant->update([
+                        'name' => $variantData['name'],
+                        'number' => $variantData['number'],
+                        'price' => $variantData['price'],
+                    ]);
+                    $existingVariantIds[] = $variantData['id'];
+                }
+            } else {
+                // Create new variant
+                $newVariant = $product->variants()->create([
+                    'name' => $variantData['name'],
+                    'number' => $variantData['number'],
+                    'price' => $variantData['price'],
+                ]);
+                $existingVariantIds[] = $newVariant->id;
+            }
+        }
+
+        // Delete variants that are not in the request
+        $product->variants()->whereNotIn('id', $existingVariantIds)->delete();
 
         return to_route('employee.production.products.index')
             ->with('success', 'Product updated successfully.');

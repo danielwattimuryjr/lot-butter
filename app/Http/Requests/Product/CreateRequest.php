@@ -25,9 +25,11 @@ class CreateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|max:50',
-            'pack' => 'required|integer',
-            'price' => 'required|numeric|min:0',
+            'name' => 'required|string|max:50',
+            'variants' => 'required|array|min:1',
+            'variants.*.name' => 'required|string|max:100',
+            'variants.*.number' => 'required|integer',
+            'variants.*.price' => 'required|numeric|min:0',
         ];
     }
 }

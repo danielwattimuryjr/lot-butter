@@ -54,8 +54,6 @@
                         <tr class="border-b border-gray-200">
                             <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">No.</th>
                             <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Product Name</th>
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Pack</th>
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Product Price</th>
                             @if (auth()->user()->team->name == "Production")
                                 <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Actions</th>
                             @endif
@@ -69,10 +67,20 @@
                                 <td class="px-4 py-4 text-sm text-gray-700">
                                     {{ $loop->iteration + ($products->currentPage() - 1) * $products->perPage() }}
                                 </td>
-                                <td class="px-4 py-4 text-sm text-gray-700">{{ $product->name }}</td>
-                                <td class="px-4 py-4 text-sm text-gray-700">{{ $product->pack ?? "-" }}</td>
                                 <td class="px-4 py-4 text-sm text-gray-700">
-                                    {{ "Rp" . number_format($product->price, 2) }}
+                                    <div class="flex items-center gap-2">
+                                        <button
+                                            type="button"
+                                            onclick="toggleVariants(event, {{ $product->id }})"
+                                            class="text-orange-400 transition-colors hover:text-orange-600"
+                                        >
+                                            <x-heroicon-o-chevron-down
+                                                class="h-5 w-5 transition-transform"
+                                                id="icon-{{ $product->id }}"
+                                            />
+                                        </button>
+                                        <span>{{ $product->name }}</span>
+                                    </div>
                                 </td>
 
                                 @if (auth()->user()->team->name == "Production")
@@ -105,7 +113,7 @@
 
                                 <td class="px-4 py-4 text-sm text-gray-700">
                                     <a
-                                        href="{{ route("employee.production.products.bill-of-materials.index", [$product]) }}"
+                                        href="{{ route("employee.production.bill-of-materials.index", ["product" => $product->id]) }}"
                                         class="text-orange-400 transition-colors hover:text-orange-600"
                                     >
                                         BOM
@@ -118,9 +126,62 @@
                                     </a>
                                 </td>
                             </tr>
+                            <tr id="variants-{{ $product->id }}" class="hidden bg-gray-50">
+                                <td
+                                    colspan="@if(auth()->user()->team->name == 'Production') 4 @else 3 @endif"
+                                    class="px-4 py-4"
+                                >
+                                    <div class="ml-8">
+                                        <h4 class="mb-3 text-sm font-semibold text-gray-700">Product Variants</h4>
+                                        @if ($product->variants->count() > 0)
+                                            <table class="w-full">
+                                                <thead class="bg-white">
+                                                    <tr class="border-b border-gray-200">
+                                                        <th
+                                                            class="px-4 py-2 text-left text-xs font-medium text-gray-600"
+                                                        >
+                                                            Variant Name
+                                                        </th>
+                                                        <th
+                                                            class="px-4 py-2 text-left text-xs font-medium text-gray-600"
+                                                        >
+                                                            Number
+                                                        </th>
+                                                        <th
+                                                            class="px-4 py-2 text-left text-xs font-medium text-gray-600"
+                                                        >
+                                                            Price
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($product->variants as $variant)
+                                                        <tr class="border-b border-gray-200">
+                                                            <td class="px-4 py-2 text-sm text-gray-600">
+                                                                {{ $variant->name }}
+                                                            </td>
+                                                            <td class="px-4 py-2 text-sm text-gray-600">
+                                                                {{ $variant->number }}
+                                                            </td>
+                                                            <td class="px-4 py-2 text-sm text-gray-600">
+                                                                {{ "Rp" . number_format($variant->price, 2) }}
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        @else
+                                            <p class="text-sm text-gray-500">No variants available for this product.</p>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
                         @empty
                             <tr class="border-b border-gray-100 hover:bg-gray-50">
-                                <td colspan="5" class="px-4 py-8 text-center text-sm text-gray-500">
+                                <td
+                                    colspan="@if(auth()->user()->team->name == 'Production') 4 @else 3 @endif"
+                                    class="px-4 py-8 text-center text-sm text-gray-500"
+                                >
                                     No products found.
                                 </td>
                             </tr>
@@ -133,4 +194,22 @@
             <x-table-pagination :paginator="$products" />
         </div>
     </div>
+
+    <script>
+        function toggleVariants(event, productId) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const variantsRow = document.getElementById(`variants-${productId}`);
+            const icon = document.getElementById(`icon-${productId}`);
+
+            if (variantsRow.classList.contains('hidden')) {
+                variantsRow.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                variantsRow.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+    </script>
 @endsection

@@ -25,16 +25,11 @@ class CreateRequest extends FormRequest
      */
     public function rules(): array
     {
-        $productId = $this->route('product')->id;
-
         return [
-            'component_id' => [
-                'required',
-                'exists:components,id',
-                Rule::unique('bills_of_materials', 'component_id')
-                    ->where('product_id', $productId)
-            ],
-            'quantity' => 'required|decimal:1,4|min:0',
+            'components' => 'required|array|min:1',
+            'components.*.component_id' => 'required|exists:components,id',
+            'components.*.quantity' => 'required|numeric|min:0',
+            'components.*.level' => 'required|in:0,1,2',
         ];
     }
 }

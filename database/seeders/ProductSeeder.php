@@ -13,22 +13,27 @@ class ProductSeeder extends Seeder
      */
     public function run(): void
     {
-        Product::create([
+        $product = Product::create([
             'name' => 'Mochi Ichigo Daifuku',
-            'pack' => 4,
-            'price' => 65000,
         ]);
 
-        Product::create([
-            'name' => 'Mochi Ichigo Daifuku',
-            'pack' => 8,
-            'price' => 85000,
-        ]);
-
-        Product::create([
-            'name' => 'Mochi Ichigo Daifuku',
-            'pack' => 16,
-            'price' => 160000,
+        // Create variants for the product
+        $product->variants()->createMany([
+            [
+                'name' => 'Isi 4',
+                'number' => 4,
+                'price' => 65000,
+            ],
+            [
+                'name' => 'Isi 8',
+                'number' => 8,
+                'price' => 85000,
+            ],
+            [
+                'name' => 'Isi 16',
+                'number' => 16,
+                'price' => 160000,
+            ],
         ]);
     }
 }

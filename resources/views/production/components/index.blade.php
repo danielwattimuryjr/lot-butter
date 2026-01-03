@@ -55,7 +55,6 @@
                             <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">No.</th>
                             <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Item Code</th>
                             <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Component Name</th>
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Weight</th>
                             <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Unit</th>
                             <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Category</th>
                             <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Safety Stock</th>
@@ -75,7 +74,6 @@
                                 </td>
                                 <td class="px-4 py-4 text-sm text-gray-700">{{ $component->code }}</td>
                                 <td class="px-4 py-4 text-sm text-gray-700">{{ $component->name }}</td>
-                                <td class="px-4 py-4 text-sm text-gray-700">{{ $component->weight }}</td>
                                 <td class="px-4 py-4 text-sm text-gray-700">{{ $component->unit }}</td>
                                 <td class="px-4 py-4 text-sm text-gray-700">{{ $component->category }}</td>
                                 <td class="px-4 py-4 text-sm text-gray-700">

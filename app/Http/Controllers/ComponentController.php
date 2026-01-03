@@ -26,7 +26,15 @@ class ComponentController extends Controller
 
     public function create()
     {
-        return view('production.components.create');
+        // Get distinct categories from existing components
+        $categories = Component::whereNotNull('category')
+            ->distinct()
+            ->pluck('category')
+            ->filter()
+            ->sort()
+            ->values();
+
+        return view('production.components.create', compact('categories'));
     }
 
     public function store(CreateRequest $request)

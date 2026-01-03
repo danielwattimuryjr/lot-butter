@@ -49,6 +49,12 @@
                 >
                     Product
                 </a>
+                <a
+                    href="{{ route("employee.production.bill-of-materials.index") }}"
+                    class="block py-2 text-gray-500 transition-colors hover:text-gray-900"
+                >
+                    Bill of Materials
+                </a>
             </x-nav-item-dropdown>
 
             <!-- Supply Chain -->
