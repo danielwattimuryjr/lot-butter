@@ -71,15 +71,15 @@
                 </div>
             </div>
 
-            <!-- Product-Level Components -->
-            @if ($productLevel1Components->isNotEmpty())
-                <div class="mb-4">
-                    <h3 class="mb-2 text-sm font-medium text-gray-700">Product Components (Aggregate)</h3>
-                    <p class="mb-3 text-xs text-gray-500">Gross Req = SUM(MPS all variants) × BOM Quantity</p>
+            <!-- All Level 1 Components (Distinct) -->
+            @if ($allLevel1Components->isNotEmpty())
+                <div>
+                    <h3 class="mb-2 text-sm font-medium text-gray-700">All Components</h3>
+                    <p class="mb-3 text-xs text-gray-500">Gross Req = Product BOM + SUM(Variant BOMs)</p>
                     <div class="space-y-2">
-                        @foreach ($productLevel1Components as $component)
+                        @foreach ($allLevel1Components as $component)
                             <a
-                                href="{{ route("employee.production.mrp.level1-product", [$product, $component]) }}"
+                                href="{{ route("employee.production.mrp.level1", [$product, $component]) }}"
                                 class="block rounded-lg border border-gray-200 p-3 transition-all hover:border-green-400 hover:bg-green-50"
                             >
                                 <div class="flex items-center justify-between">
@@ -102,49 +102,7 @@
                 </div>
             @endif
 
-            <!-- Variant-Specific Components -->
-            @if (count($variantLevel1Components) > 0)
-                <div>
-                    <h3 class="mb-2 text-sm font-medium text-gray-700">Variant-Specific Components</h3>
-                    <p class="mb-3 text-xs text-gray-500">Gross Req = MPS of specific variant × BOM Quantity</p>
-                    <div class="space-y-4">
-                        @foreach ($variantLevel1Components as $variantData)
-                            <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
-                                <h4 class="mb-2 text-sm font-semibold text-gray-900">
-                                    {{ $variantData["variant"]->name }}
-                                </h4>
-                                <div class="space-y-2">
-                                    @foreach ($variantData["components"] as $component)
-                                        <a
-                                            href="{{ route("employee.production.mrp.level1-variant", [$product, $variantData["variant"], $component]) }}"
-                                            class="block rounded-lg border border-white bg-white p-3 transition-all hover:border-green-400 hover:bg-green-50"
-                                        >
-                                            <div class="flex items-center justify-between">
-                                                <div class="flex items-center gap-3">
-                                                    <div
-                                                        class="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100"
-                                                    >
-                                                        <x-heroicon-o-cube class="h-4 w-4 text-gray-600" />
-                                                    </div>
-                                                    <div>
-                                                        <h5 class="text-sm font-medium text-gray-900">
-                                                            {{ $component->name }}
-                                                        </h5>
-                                                        <p class="text-xs text-gray-500">{{ $component->unit }}</p>
-                                                    </div>
-                                                </div>
-                                                <x-heroicon-o-chevron-right class="h-4 w-4 text-gray-400" />
-                                            </div>
-                                        </a>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            @endif
-
-            @if ($productLevel1Components->isEmpty() && count($variantLevel1Components) == 0)
+            @if ($allLevel1Components->isEmpty())
                 <p class="py-4 text-center text-sm text-gray-500">No Level 1 components found</p>
             @endif
         </div>

@@ -115,14 +115,26 @@
                                     // Level 0: Gross Req from forecast / variant number
                                     $grossRequirement = ceil($forecast->forecast_value / ($variant->number ?? 1));
                                 } elseif ($level == "1") {
-                                    // Level 1 has two types:
-                                    if (isset($isProductLevel) && $isProductLevel) {
-                                        // Product-level component: Gross Req = forecast × BOM qty
-                                        $grossRequirement = ceil($forecast->forecast_value) * ($bomQuantity ?? 1);
-                                    } else {
-                                        // Variant-specific component: Gross Req = (forecast / variant number) × BOM qty
-                                        $grossRequirement = ceil($forecast->forecast_value / ($variant->number ?? 1)) * ($bomQuantity ?? 1);
+                                    // Level 1: Sum from both product BOM and variant BOMs
+                                    $totalGrossReq = 0;
+                                    
+                                    // Add product-level BOM contribution
+                                    if (isset($productBom) && $productBom) {
+                                        $totalGrossReq += ceil($forecast->forecast_value) * $productBom->quantity;
                                     }
+                                    
+                                    // Add variant-level BOM contributions
+                                    if (isset($variantBoms) && $variantBoms->isNotEmpty()) {
+                                        foreach ($variantBoms as $bomEntry) {
+                                            $variantObj = \App\Models\ProductVariant::find($bomEntry->product_variant_id);
+                                            if ($variantObj) {
+                                                // For each variant: (forecast / variant.number) × BOM qty
+                                                $totalGrossReq += ceil($forecast->forecast_value / $variantObj->number) * $bomEntry->quantity;
+                                            }
+                                        }
+                                    }
+                                    
+                                    $grossRequirement = $totalGrossReq;
                                 } else {
                                     // Level 2: Gross Req = forecast value × BOM quantity
                                     $grossRequirement = ceil($forecast->forecast_value) * ($bomQuantity ?? 1);

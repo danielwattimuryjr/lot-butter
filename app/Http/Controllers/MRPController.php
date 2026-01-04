@@ -32,32 +32,17 @@ class MRPController extends Controller
     {
         $product->load('variants');
 
-        // Get Level 1 components from Product BOM
-        $productLevel1Components = Component::whereIn('id', function ($query) use ($product) {
+        // Get ALL distinct Level 1 components from both Product BOM and Variant BOMs
+        $allLevel1Components = Component::whereIn('id', function ($query) use ($product) {
             $query->select('component_id')
                 ->from('bill_of_materials')
-                ->where('product_id', $product->id)
                 ->where('level', 1)
-                ->whereNull('product_variant_id');
+                ->where(function($q) use ($product) {
+                    $q->where('product_id', $product->id)
+                      ->orWhereIn('product_variant_id', $product->variants->pluck('id'));
+                })
+                ->distinct();
         })->get();
-
-        // Get Level 1 components from each Variant BOM (grouped)
-        $variantLevel1Components = [];
-        foreach ($product->variants as $variant) {
-            $components = Component::whereIn('id', function ($query) use ($variant) {
-                $query->select('component_id')
-                    ->from('bill_of_materials')
-                    ->where('product_variant_id', $variant->id)
-                    ->where('level', 1);
-            })->get();
-
-            if ($components->isNotEmpty()) {
-                $variantLevel1Components[$variant->id] = [
-                    'variant' => $variant,
-                    'components' => $components,
-                ];
-            }
-        }
 
         // Get Level 2 components from Product BOM
         $level2Components = Component::whereIn('id', function ($query) use ($product) {
@@ -69,8 +54,7 @@ class MRPController extends Controller
 
         return view('production.mrp.overview', compact(
             'product',
-            'productLevel1Components',
-            'variantLevel1Components',
+            'allLevel1Components',
             'level2Components'
         ));
     }
@@ -128,27 +112,34 @@ class MRPController extends Controller
     /**
      * Show MRP table for Level 1 Product Component (Aggregate from all variants)
      */
-    public function level1Product(Product $product, Component $component)
+    /**
+     * Show MRP table for Level 1 Component (unified: handles both product and variant BOMs)
+     */
+    public function level1(Product $product, Component $component)
     {
         $todayDate = Carbon::now();
         $currentMonth = $todayDate->month;
         $currentYear = $todayDate->year;
 
-        // Get BOM data for this component
-        $bom = DB::table('bill_of_materials')
+        // Get all BOM entries for this component (both product-level and variant-level)
+        $productBom = DB::table('bill_of_materials')
             ->where('product_id', $product->id)
             ->where('component_id', $component->id)
             ->where('level', 1)
             ->whereNull('product_variant_id')
             ->first();
 
-        if (! $bom) {
-            abort(404, 'Component not found in product BOM');
+        $variantBoms = DB::table('bill_of_materials')
+            ->where('component_id', $component->id)
+            ->where('level', 1)
+            ->whereIn('product_variant_id', $product->variants->pluck('id'))
+            ->get();
+
+        if (!$productBom && $variantBoms->isEmpty()) {
+            abort(404, 'Component not found in any BOM');
         }
 
-        $bomQuantity = $bom->quantity;
-
-        // Get aggregated beginning inventory from all variants
+        // Get aggregated beginning inventory
         $variantIds = $product->variants->pluck('id');
         $beginningInventory = MasterProductionSchedule::whereIn('product_variant_id', $variantIds)
             ->where('year', $currentYear)
@@ -165,7 +156,6 @@ class MRPController extends Controller
 
         // Get edited MRP records
         $mrpRecords = MaterialRequirementsPlanning::where('level', '1')
-            ->where('product_id', $product->id)
             ->where('component_id', $component->id)
             ->where('year', $currentYear)
             ->get()
@@ -179,66 +169,9 @@ class MRPController extends Controller
             'currentYear',
             'currentMonth',
             'beginningInventory',
-            'bomQuantity'
-        ))->with('level', '1')->with('entityName', $component->name)->with('entity', $component)->with('variant', null)->with('isProductLevel', true);
-    }
-
-    /**
-     * Show MRP table for Level 1 Variant Component
-     */
-    public function level1Variant(Product $product, ProductVariant $variant, Component $component)
-    {
-        $todayDate = Carbon::now();
-        $currentMonth = $todayDate->month;
-        $currentYear = $todayDate->year;
-
-        // Get BOM data for this component
-        $bom = DB::table('bill_of_materials')
-            ->where('product_variant_id', $variant->id)
-            ->where('component_id', $component->id)
-            ->where('level', 1)
-            ->first();
-
-        if (! $bom) {
-            abort(404, 'Component not found in variant BOM');
-        }
-
-        $bomQuantity = $bom->quantity;
-
-        // Get beginning inventory for this variant
-        $mpsRecord = MasterProductionSchedule::where('product_variant_id', $variant->id)
-            ->where('year', $currentYear)
-            ->where('month', $currentMonth)
-            ->first();
-        $beginningInventory = $mpsRecord->beginning_inventory ?? 0;
-
-        // Get forecast data for this month only
-        $forecasts = DB::table('forecasts')
-            ->where('product_id', $product->id)
-            ->where('year', $currentYear)
-            ->whereRaw('MONTH(STR_TO_DATE(CONCAT(year, \'-W\', LPAD(week, 2, \'0\'), \'-1\'), \'%X-W%V-%w\')) = ?', [$currentMonth])
-            ->orderBy('week')
-            ->get();
-
-        // Get edited MRP records
-        $mrpRecords = MaterialRequirementsPlanning::where('level', '1')
-            ->where('product_variant_id', $variant->id)
-            ->where('component_id', $component->id)
-            ->where('year', $currentYear)
-            ->get()
-            ->keyBy('week');
-
-        return view('production.mrp.table', compact(
-            'product',
-            'variant',
-            'component',
-            'forecasts',
-            'mrpRecords',
-            'currentYear',
-            'currentMonth',
-            'beginningInventory',
-            'bomQuantity'
-        ))->with('level', '1')->with('entityName', $component->name)->with('entity', $component)->with('isProductLevel', false);
+            'productBom',
+            'variantBoms'
+        ))->with('level', '1')->with('entityName', $component->name)->with('entity', $component)->with('variant', null);
     }
 
     /**

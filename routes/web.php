@@ -73,10 +73,8 @@ Route::middleware(['auth'])->group(function () use ($exceptShow) {
                         ->name('mrp.overview');
                     Route::get('material-requirements-planning/{product}/level-0/{variant}', [MRPController::class, 'level0'])
                         ->name('mrp.level0');
-                    Route::get('material-requirements-planning/{product}/level-1/product/{component}', [MRPController::class, 'level1Product'])
-                        ->name('mrp.level1-product');
-                    Route::get('material-requirements-planning/{product}/level-1/variant/{variant}/{component}', [MRPController::class, 'level1Variant'])
-                        ->name('mrp.level1-variant');
+                    Route::get('material-requirements-planning/{product}/level-1/{component}', [MRPController::class, 'level1'])
+                        ->name('mrp.level1');
                     Route::get('material-requirements-planning/{product}/level-2/{component}', [MRPController::class, 'level2'])
                         ->name('mrp.level2');
                     Route::get('material-requirements-planning/edit/{level}/{entityId}/{year}/{week}', [MRPController::class, 'edit'])
