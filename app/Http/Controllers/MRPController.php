@@ -37,9 +37,9 @@ class MRPController extends Controller
             $query->select('component_id')
                 ->from('bill_of_materials')
                 ->where('level', 1)
-                ->where(function($q) use ($product) {
+                ->where(function ($q) use ($product) {
                     $q->where('product_id', $product->id)
-                      ->orWhereIn('product_variant_id', $product->variants->pluck('id'));
+                        ->orWhereIn('product_variant_id', $product->variants->pluck('id'));
                 })
                 ->distinct();
         })->get();
@@ -154,6 +154,13 @@ class MRPController extends Controller
             ->orderBy('week')
             ->get();
 
+        // Get MPS data for all variants (keyed by variant_id and week)
+        $mpsData = MasterProductionSchedule::whereIn('product_variant_id', $product->variants->pluck('id'))
+            ->where('year', $currentYear)
+            ->where('month', $currentMonth)
+            ->get()
+            ->groupBy('product_variant_id');
+
         // Get edited MRP records
         $mrpRecords = MaterialRequirementsPlanning::where('level', '1')
             ->where('component_id', $component->id)
@@ -170,7 +177,8 @@ class MRPController extends Controller
             'currentMonth',
             'beginningInventory',
             'productBom',
-            'variantBoms'
+            'variantBoms',
+            'mpsData'
         ))->with('level', '1')->with('entityName', $component->name)->with('entity', $component)->with('variant', null);
     }
 
@@ -261,10 +269,10 @@ class MRPController extends Controller
             ->where('year', $year)
             ->where('week', $week)
             ->where('component_id', $entityId)
-            ->when($level == '0', fn ($q) => $q->where('product_variant_id', $entityId))
-            ->when($level == '1' && isset($variantId) && $variantId, fn ($q) => $q->where('product_variant_id', $variantId))
-            ->when($level == '1' && (! isset($variantId) || ! $variantId), fn ($q) => $q->where('product_id', $product->id))
-            ->when($level == '2', fn ($q) => $q->where('product_id', $product->id))
+            ->when($level == '0', fn($q) => $q->where('product_variant_id', $entityId))
+            ->when($level == '1' && isset($variantId) && $variantId, fn($q) => $q->where('product_variant_id', $variantId))
+            ->when($level == '1' && (! isset($variantId) || ! $variantId), fn($q) => $q->where('product_id', $product->id))
+            ->when($level == '2', fn($q) => $q->where('product_id', $product->id))
             ->first();
 
         return view('production.mrp.edit', compact(
@@ -365,7 +373,7 @@ class MRPController extends Controller
         } catch (Exception $th) {
             DB::rollBack();
 
-            return back()->with('error', 'Failed to update MRP values: '.$th->getMessage());
+            return back()->with('error', 'Failed to update MRP values: ' . $th->getMessage());
         }
     }
 }

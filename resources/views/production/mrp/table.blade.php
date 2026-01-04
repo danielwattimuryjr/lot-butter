@@ -112,28 +112,61 @@
 
                                 // Calculate Gross Requirement based on level
                                 if ($level == "0") {
-                                    // Level 0: Gross Req from forecast / variant number
-                                    $grossRequirement = ceil($forecast->forecast_value / ($variant->number ?? 1));
+                                    // Level 0: Use MPS Available (the planned production for this variant)
+                                    // If MPS not set, calculate from forecast
+                                    $mps = $mpsData->get($week);
+                                    if ($mps && $mps->available > 0) {
+                                        $grossRequirement = $mps->available;
+                                    } else {
+                                        // Fallback: calculate from forecast
+                                        $grossRequirement = ceil($forecast->forecast_value / ($variant->number ?? 1));
+                                    }
                                 } elseif ($level == "1") {
                                     // Level 1: Sum from both product BOM and variant BOMs
+                                    // Use MPS Available = forecast / variant.number (same as MPS calculation)
                                     $totalGrossReq = 0;
-                                    
-                                    // Add product-level BOM contribution
+
+                                    // Add product-level BOM contribution: SUM(MPS × variant.number) × BOM qty
                                     if (isset($productBom) && $productBom) {
-                                        $totalGrossReq += ceil($forecast->forecast_value) * $productBom->quantity;
-                                    }
-                                    
-                                    // Add variant-level BOM contributions
-                                    if (isset($variantBoms) && $variantBoms->isNotEmpty()) {
-                                        foreach ($variantBoms as $bomEntry) {
-                                            $variantObj = \App\Models\ProductVariant::find($bomEntry->product_variant_id);
-                                            if ($variantObj) {
-                                                // For each variant: (forecast / variant.number) × BOM qty
-                                                $totalGrossReq += ceil($forecast->forecast_value / $variantObj->number) * $bomEntry->quantity;
+                                        foreach ($product->variants as $variantItem) {
+                                            // Get MPS Available (or calculate from forecast)
+                                            $variantMpsRecords = $mpsData->get($variantItem->id);
+                                            $mpsAvailable = 0;
+                                            if ($variantMpsRecords) {
+                                                $mps = $variantMpsRecords->firstWhere("week", $week);
+                                                $mpsAvailable = $mps?->available ?? 0;
                                             }
+                                            // If MPS not set, calculate: forecast / variant.number
+                                            if ($mpsAvailable == 0) {
+                                                $mpsAvailable = ceil($forecast->forecast_value / $variantItem->number);
+                                            }
+                                            // Product BOM: MPS × variant.number × BOM qty
+                                            $totalGrossReq += $mpsAvailable * $variantItem->number * $productBom->quantity;
                                         }
                                     }
-                                    
+
+                                    // Add variant-level BOM contributions: SUM(MPS × BOM qty)
+                                    if (isset($variantBoms) && $variantBoms->isNotEmpty()) {
+                                        foreach ($variantBoms as $bomEntry) {
+                                            // Get MPS Available (or calculate from forecast)
+                                            $variantMpsRecords = $mpsData->get($bomEntry->product_variant_id);
+                                            $mpsAvailable = 0;
+                                            if ($variantMpsRecords) {
+                                                $mps = $variantMpsRecords->firstWhere("week", $week);
+                                                $mpsAvailable = $mps?->available ?? 0;
+                                            }
+                                            // If MPS not set, calculate: forecast / variant.number
+                                            if ($mpsAvailable == 0) {
+                                                $variantObj = $product->variants->firstWhere("id", $bomEntry->product_variant_id);
+                                                if ($variantObj) {
+                                                    $mpsAvailable = ceil($forecast->forecast_value / $variantObj->number);
+                                                }
+                                            }
+                                            // Variant BOM: MPS × BOM qty
+                                            $totalGrossReq += $mpsAvailable * $bomEntry->quantity;
+                                        }
+                                    }
+
                                     $grossRequirement = $totalGrossReq;
                                 } else {
                                     // Level 2: Gross Req = forecast value × BOM quantity
