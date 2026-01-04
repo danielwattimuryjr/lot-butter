@@ -14,7 +14,7 @@ class CreateRequest extends FormRequest
     {
         return Auth::check()
             && Auth::user()->hasRole('employee')
-            && Auth::user()->team->name === 'Procurement';
+            && Auth::user()->team->name === 'Supply Chain';
     }
 
     /**

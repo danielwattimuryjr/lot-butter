@@ -1,6 +1,6 @@
 @extends("layouts.dashboard")
 
-@section("title", "Procurement")
+@section("title", "Supply Chain")
 
 @section("content")
     <div class="space-y-6">
@@ -11,7 +11,7 @@
             <div class="mt-2 border-b border-gray-200"></div>
         </div>
 
-        @if (auth()->user()->team->name == "Procurement")
+        @if (auth()->user()->team->name == "Supply Chain")
             <!-- Action Buttons -->
             <div class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                 <div class="flex flex-wrap gap-3">
@@ -63,7 +63,7 @@
                             <th class="px-4 py-3 text-right text-sm font-medium text-gray-600">Total Amount</th>
                             <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Purchase Date</th>
                             <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Supplier</th>
-                            @if (auth()->user()->team->name == "Procurement")
+                            @if (auth()->user()->team->name == "Supply Chain")
                                 <th class="px-4 py-3 text-center text-sm font-medium text-gray-600">Actions</th>
                             @endif
                         </tr>
@@ -109,7 +109,7 @@
                                         {{ $procurement->supplier }}
                                     </span>
                                 </td>
-                                @if (auth()->user()->team->name == "Procurement")
+                                @if (auth()->user()->team->name == "Supply Chain")
                                     <td class="px-4 py-4">
                                         <div class="flex items-center justify-center gap-3">
                                             <a
@@ -155,7 +155,7 @@
                                         <p class="mt-1 text-sm text-gray-500">
                                             Start by creating your first component purchase.
                                         </p>
-                                        @if (auth()->user()->team->name == "Procurement")
+                                        @if (auth()->user()->team->name == "Supply Chain")
                                             <a
                                                 href="{{ route("employee.supply-chain.procurements.create") }}"
                                                 class="mt-4 inline-flex items-center gap-2 rounded-lg bg-butter-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-butter-600"

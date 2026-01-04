@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Helpers\StringHelper;
 use App\Models\Employee;
 use App\Models\Team;
 use App\Models\User;
@@ -30,7 +31,7 @@ class EmployeeSeeder extends Seeder
                 'name' => 'Adinda Lailatul',
                 'nip' => '12012030100',
                 'phone_number' => '08887187212',
-                'team_id' => $teams['Procurement'],
+                'team_id' => $teams['Supply Chain'],
             ],
             [
                 'name' => 'Andi Siti',
@@ -50,11 +51,11 @@ class EmployeeSeeder extends Seeder
             // Create user account for the employee
             User::create([
                 'employee_id' => $employee->id,
-                'username' => 'user.'.$teamName,
+                'username' => 'user.' . StringHelper::toSnakeCase($teamName),
                 'password' => Hash::make('password'),
             ])->addRole('employee');
         }
 
-        $this->command->info('Created '.count($employees).' employees with user accounts');
+        $this->command->info('Created ' . count($employees) . ' employees with user accounts');
     }
 }

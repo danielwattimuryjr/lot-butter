@@ -20,7 +20,7 @@ class TeamSeeder extends Seeder
                 'description' => 'Manages financial transactions',
             ],
             [
-                'name' => 'Procurement',
+                'name' => 'Supply Chain',
                 'description' => 'Manages purchasing activities',
             ],
             [
@@ -33,6 +33,6 @@ class TeamSeeder extends Seeder
             Team::create($team);
         }
 
-        $this->command->info('Created '.count($teams).' teams successfully');
+        $this->command->info('Created ' . count($teams) . ' teams successfully');
     }
 }
