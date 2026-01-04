@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Income;
 use App\Models\Product;
+use App\Services\JournalService;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
@@ -11,6 +12,8 @@ class IncomeSeeder extends Seeder
 {
     public function run(): void
     {
+        $journalService = app(JournalService::class);
+
         // Get Mochi Ichigo Daifuku product and its variants
         $product = Product::where('name', 'Mochi Ichigo Daifuku')->first();
 
@@ -86,7 +89,7 @@ class IncomeSeeder extends Seeder
             $unitPrice = $variant->price;
             $amount = $quantity * $unitPrice;
 
-            Income::create([
+            $income = Income::create([
                 'code' => 'INC-'.str_pad($index + 1, 4, '0', STR_PAD_LEFT),
                 'product_id' => $product->id,
                 'product_variant_id' => $variant->id,
@@ -97,8 +100,12 @@ class IncomeSeeder extends Seeder
                 'date_received' => $date->toDateString(),
                 'week' => $week,
             ]);
+
+            // Create journal entry using the service
+            $journalService->createFromIncome($income);
         }
 
         $this->command->info('Created '.count($quantities).' income records for Mochi Ichigo Daifuku');
+        $this->command->info('Created '.count($quantities).' journal entries');
     }
 }

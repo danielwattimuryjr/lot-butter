@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('code', 10)->unique();
             $table->integer('safety_stock')->nullable();
             $table->string('name', 50);
-            $table->string('unit');
+            $table->string('unit', 10);
             $table->string('category', 50);
             $table->timestamps();
         });

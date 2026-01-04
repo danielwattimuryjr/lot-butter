@@ -20,7 +20,7 @@ return new class extends Migration
             $table->decimal('unit_price', 15, 2);
             $table->decimal('amount', 15, 2);
             $table->date('date_received');
-            $table->integer('week');
+            $table->unsignedTinyInteger('week');
             $table->timestamps();
 
             $table->index('date_received');

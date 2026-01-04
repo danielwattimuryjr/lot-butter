@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('code', 10)->unique();
             $table->date('date');
-            $table->string('description');
+            $table->text('description');
             $table->decimal('debit', 15, 2)->nullable();
             $table->decimal('credit', 15, 2)->nullable();
             $table->decimal('balance', 15, 2)->default(0);
@@ -24,7 +24,7 @@ return new class extends Migration
                 'purchase',
                 'adjustment',
             ]);
-            $table->string('reference_table')->nullable();
+            $table->string('reference_table', 50)->nullable();
             $table->unsignedBigInteger('reference_id')->nullable();
             $table->foreignId('product_id')
                 ->nullable()

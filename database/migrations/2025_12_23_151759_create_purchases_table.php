@@ -20,8 +20,8 @@ return new class extends Migration
             $table->decimal('unit_price', 15, 2);
             $table->decimal('total_amount', 15, 2);
             $table->date('date');
-            $table->integer('week');
-            $table->string('supplier')->nullable();
+            $table->unsignedTinyInteger('week');
+            $table->string('supplier', 50)->nullable();
             $table->timestamps();
 
             $table->index('date');
