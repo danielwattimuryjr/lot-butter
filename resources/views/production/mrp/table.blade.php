@@ -122,30 +122,11 @@
                                         $grossRequirement = ceil($forecast->forecast_value / ($variant->number ?? 1));
                                     }
                                 } elseif ($level == "1") {
-                                    // Level 1: Sum from both product BOM and variant BOMs
+                                    // Level 1: Only use Variant BOMs (exclude Product BOM to avoid double counting)
                                     // Use MPS Available = forecast / variant.number (same as MPS calculation)
                                     $totalGrossReq = 0;
 
-                                    // Add product-level BOM contribution: SUM(MPS × variant.number) × BOM qty
-                                    if (isset($productBom) && $productBom) {
-                                        foreach ($product->variants as $variantItem) {
-                                            // Get MPS Available (or calculate from forecast)
-                                            $variantMpsRecords = $mpsData->get($variantItem->id);
-                                            $mpsAvailable = 0;
-                                            if ($variantMpsRecords) {
-                                                $mps = $variantMpsRecords->firstWhere("week", $week);
-                                                $mpsAvailable = $mps?->available ?? 0;
-                                            }
-                                            // If MPS not set, calculate: forecast / variant.number
-                                            if ($mpsAvailable == 0) {
-                                                $mpsAvailable = ceil($forecast->forecast_value / $variantItem->number);
-                                            }
-                                            // Product BOM: MPS × variant.number × BOM qty
-                                            $totalGrossReq += $mpsAvailable * $variantItem->number * $productBom->quantity;
-                                        }
-                                    }
-
-                                    // Add variant-level BOM contributions: SUM(MPS × BOM qty)
+                                    // Only calculate from variant-level BOM: SUM(MPS × BOM qty)
                                     if (isset($variantBoms) && $variantBoms->isNotEmpty()) {
                                         foreach ($variantBoms as $bomEntry) {
                                             // Get MPS Available (or calculate from forecast)
