@@ -28,6 +28,10 @@
             <h1 class="text-xl font-bold text-gray-900">
                 {{ $product->name }} ({{ $variant->name }}) - Master Production Schedule
             </h1>
+            <p class="mt-1 text-sm text-gray-600">
+                Sales Percentage:
+                <span class="font-semibold text-butter-600">{{ number_format($salesPercentage, 2) }}%</span>
+            </p>
             <div class="mt-2 border-b border-gray-200"></div>
         </div>
 
@@ -55,6 +59,53 @@
                 </div>
             </div>
         @endif
+
+        <!-- Month and Year Selector -->
+        <div class="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+            <form
+                method="GET"
+                action="{{ route("employee.production.master-production-schedules.variant", [$product, $variant]) }}"
+                class="flex items-end gap-4"
+            >
+                <div class="flex-1">
+                    <label for="month" class="mb-1 block text-sm font-medium text-gray-700">Month</label>
+                    <select
+                        name="month"
+                        id="month"
+                        class="w-full rounded-lg border-gray-300 focus:border-butter-500 focus:ring-butter-500"
+                    >
+                        @for ($m = 1; $m <= 12; $m++)
+                            <option value="{{ $m }}" {{ $currentMonth == $m ? "selected" : "" }}>
+                                {{ \Carbon\Carbon::create()->month($m)->format("F") }}
+                            </option>
+                        @endfor
+                    </select>
+                </div>
+                <div class="flex-1">
+                    <label for="year" class="mb-1 block text-sm font-medium text-gray-700">Year</label>
+                    <select
+                        name="year"
+                        id="year"
+                        class="w-full rounded-lg border-gray-300 focus:border-butter-500 focus:ring-butter-500"
+                    >
+                        @for ($y = 2025; $y <= 2030; $y++)
+                            <option value="{{ $y }}" {{ $currentYear == $y ? "selected" : "" }}>
+                                {{ $y }}
+                            </option>
+                        @endfor
+                    </select>
+                </div>
+                <div>
+                    <button
+                        type="submit"
+                        class="inline-flex items-center gap-2 rounded-lg bg-butter-500 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-butter-600"
+                    >
+                        <x-heroicon-o-magnifying-glass class="h-5 w-5" />
+                        Search
+                    </button>
+                </div>
+            </form>
+        </div>
 
         <!-- MPS Table -->
         <div class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
@@ -97,7 +148,7 @@
                             <td class="border border-gray-200 px-4 py-4 text-center text-sm text-gray-700">-</td>
                             @foreach ($forecasts as $forecast)
                                 <td class="border border-gray-200 px-4 py-4 text-center text-sm text-gray-700">
-                                    {{ number_format(ceil($forecast->forecast_value / $variant->number)) }}
+                                    {{ number_format(floor(($forecast->forecast_value * $salesPercentage) / 100 / $variant->number)) }}
                                 </td>
                             @endforeach
                         </tr>
@@ -107,14 +158,26 @@
                             <td class="border border-gray-200 px-4 py-4 text-sm font-medium text-gray-700">MPS</td>
                             <td class="border border-gray-200 px-4 py-4 text-center text-sm text-gray-700">-</td>
                             @php
-                                $projectedOnHand = $beginningInventory;
+                                $prevPOH = $beginningInventory;
+                                $mpsValues = []; // Store MPS values for Available calculation
                             @endphp
 
                             @foreach ($forecasts as $forecast)
                                 @php
-                                    $forecastDemand = ceil($forecast->forecast_value / $variant->number);
-                                    $mps = $forecastDemand - $projectedOnHand;
-                                    $projectedOnHand = 0; // Reset for next iteration
+                                    $forecastDemand = floor(($forecast->forecast_value * $salesPercentage) / 100 / $variant->number);
+
+                                    // MPS = Forecast - POH minggu sebelumnya
+                                    $mps = $forecastDemand - $prevPOH;
+                                    $mpsValues[] = $mps;
+
+                                    // Update prevPOH for next iteration
+                                    // Check if user edited POH for this week
+                                    $editedRecord = $mpsRecords->firstWhere("week", $forecast->week);
+                                    if ($editedRecord && $editedRecord->is_edited && ! is_null($editedRecord->projected_on_hand)) {
+                                        $prevPOH = $editedRecord->projected_on_hand;
+                                    } else {
+                                        $prevPOH = 0;
+                                    }
                                 @endphp
 
                                 <td
@@ -132,26 +195,20 @@
                             </td>
                             <td class="border border-gray-200 px-4 py-4 text-center text-sm text-gray-700">-</td>
                             @php
-                                $available = $beginningInventory;
-                                $projectedOnHand = $beginningInventory;
+                                $available = 0;
                             @endphp
 
-                            @foreach ($forecasts as $forecast)
+                            @foreach ($forecasts as $index => $forecast)
                                 @php
-                                    $forecastDemand = ceil($forecast->forecast_value / $variant->number);
-                                    $mps = $forecastDemand - $projectedOnHand;
-                                    $available = $available + $mps - $forecastDemand;
-                                    $projectedOnHand = 0;
+                                    $forecastDemand = floor(($forecast->forecast_value * $salesPercentage) / 100 / $variant->number);
+                                    $mps = $mpsValues[$index];
 
-                                    // Check if edited value exists
-                                    $editedRecord = $mpsRecords->firstWhere("week", $forecast->week);
-                                    $displayAvailable = $editedRecord && $editedRecord->is_edited && ! is_null($editedRecord->available) ? $editedRecord->available : $available;
+                                    // Available = Available sebelumnya + MPS - Forecast
+                                    $available = $available + $mps - $forecastDemand;
                                 @endphp
 
-                                <td
-                                    class="@if ($editedRecord && $editedRecord->is_edited) font-semibold text-orange-600 @else text-gray-900 @endif border border-gray-200 px-4 py-4 text-center text-sm"
-                                >
-                                    {{ number_format($displayAvailable) }}
+                                <td class="border border-gray-200 px-4 py-4 text-center text-sm text-gray-900">
+                                    {{ number_format($available) }}
                                 </td>
                             @endforeach
                         </tr>

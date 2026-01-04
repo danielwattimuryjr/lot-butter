@@ -35,25 +35,26 @@ class MPSController extends Controller
     /**
      * Display MPS for a specific product variant
      */
-    public function index(Product $product, ProductVariant $variant)
+    public function index(Request $request, Product $product, ProductVariant $variant)
     {
         $todayDate = Carbon::now();
-        $currentMonth = $todayDate->month;
-        $currentYear = $todayDate->year;
+        $currentMonth = $request->input('month', $todayDate->month);
+        $currentYear = $request->input('year', $todayDate->year);
 
-        // Get beginning inventory for this variant (if exists)
+        // Get beginning inventory for this variant (week 0)
         $mpsRecord = MasterProductionSchedule::where('product_variant_id', $variant->id)
             ->where('year', $currentYear)
             ->where('month', $currentMonth)
+            ->where('week', 0)
             ->first();
 
         $beginningInventory = $mpsRecord->beginning_inventory ?? 0;
 
-        // Get forecasts for the product (not variant-specific)
+        // Get forecasts for the product
         $forecasts = DB::table('forecasts')
             ->where('product_id', $product->id)
             ->where('year', $currentYear)
-            ->whereRaw('MONTH(STR_TO_DATE(CONCAT(year, \'-W\', LPAD(week, 2, \'0\'), \'-1\'), \'%X-W%V-%w\')) = ?', [$currentMonth])
+            ->where('month', $currentMonth)
             ->orderBy('week')
             ->get();
 
@@ -62,6 +63,21 @@ class MPSController extends Controller
             ->where('year', $currentYear)
             ->where('is_edited', true)
             ->get();
+
+        // Calculate sales percentage for this variant
+        // Get total sales quantity for this product (all variants)
+        $totalSales = DB::table('incomes')
+            ->where('product_id', $product->id)
+            ->sum('quantity');
+
+        // Get sales quantity for this specific variant
+        $variantSales = DB::table('incomes')
+            ->where('product_id', $product->id)
+            ->where('product_variant_id', $variant->id)
+            ->sum('quantity');
+
+        // Calculate percentage
+        $salesPercentage = $totalSales > 0 ? ($variantSales / $totalSales) * 100 : 0;
 
         // Pass data to view for frontend calculation
         return view('production.master_production_schedule.index', compact(
@@ -72,7 +88,8 @@ class MPSController extends Controller
             'currentMonth',
             'currentYear',
             'mpsRecord',
-            'mpsRecords'
+            'mpsRecords',
+            'salesPercentage'
         ));
     }
 
@@ -181,7 +198,7 @@ class MPSController extends Controller
         } catch (Exception $th) {
             DB::rollBack();
 
-            return back()->with('error', 'Failed to update week values: '.$th->getMessage());
+            return back()->with('error', 'Failed to update week values: ' . $th->getMessage());
         }
     }
 }

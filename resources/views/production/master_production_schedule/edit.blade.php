@@ -107,19 +107,6 @@
                         />
                         <p class="mt-1 text-sm text-gray-500">Override the calculated projected on hand value</p>
                     </div>
-
-                    <!-- Available -->
-                    <div>
-                        <label for="available" class="block text-sm font-medium text-gray-900">Available</label>
-                        <input
-                            type="number"
-                            id="available"
-                            name="available"
-                            value="{{ $mpsRecord->available ?? 0 }}"
-                            class="mt-2 w-full rounded-lg border-gray-300 focus:border-butter-500 focus:ring-butter-500"
-                        />
-                        <p class="mt-1 text-sm text-gray-500">Override the calculated available value</p>
-                    </div>
                 @endif
 
                 <!-- Action Buttons -->

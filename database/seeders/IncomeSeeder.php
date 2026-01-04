@@ -77,35 +77,56 @@ class IncomeSeeder extends Seeder
 
         $startDate = Carbon::create(2025, 1, 6); // First Monday of 2025
 
+        // Sales percentage target per variant
+        // Isi 4: 45.01%, Isi 8: 45.83%, Isi 16: 9.16%
+        $variantsList = $variants->sortBy('number')->values();
+        $targetPercentages = [
+            $variantsList[0]->id => 45.01, // Isi 4
+            $variantsList[1]->id => 45.83, // Isi 8
+            $variantsList[2]->id => 9.16,  // Isi 16
+        ];
+
         foreach ($quantities as $index => $quantity) {
             // Get date for this week
             $date = $startDate->copy()->addWeeks($index);
             $week = $index + 1; // Continuous week numbering: 1, 2, 3, ...
 
-            // Randomly select a variant
-            $variant = $variants->random();
+            // Distribute quantity among variants based on target percentages
+            $variantIndex = 0;
+            foreach ($variantsList as $variant) {
+                $percentage = $targetPercentages[$variant->id];
+                $variantQuantity = round($quantity * ($percentage / 100));
 
-            // Calculate amount based on variant price
-            $unitPrice = $variant->price;
-            $amount = $quantity * $unitPrice;
+                if ($variantQuantity <= 0) {
+                    continue;
+                }
 
-            $income = Income::create([
-                'code' => 'INC-' . str_pad($index + 1, 4, '0', STR_PAD_LEFT),
-                'product_id' => $product->id,
-                'product_variant_id' => $variant->id,
-                'description' => 'Historical Week ' . $week,
-                'quantity' => $quantity,
-                'unit_price' => $unitPrice,
-                'amount' => $amount,
-                'date_received' => $date->toDateString(),
-                'week' => $week,
-            ]);
+                // Calculate amount based on variant price
+                $unitPrice = $variant->price;
+                $amount = $variantQuantity * $unitPrice;
 
-            // Create journal entry using the service
-            $journalService->createFromIncome($income);
+                $income = Income::create([
+                    'code' => 'INC-' . str_pad(($index * 3) + $variantIndex + 1, 4, '0', STR_PAD_LEFT),
+                    'product_id' => $product->id,
+                    'product_variant_id' => $variant->id,
+                    'description' => 'Historical Week ' . $week . ' - ' . $variant->name,
+                    'quantity' => $variantQuantity,
+                    'unit_price' => $unitPrice,
+                    'amount' => $amount,
+                    'date_received' => $date->toDateString(),
+                    'week' => $week,
+                ]);
+
+                // Create journal entry using the service
+                $journalService->createFromIncome($income);
+
+                $variantIndex++;
+            }
         }
 
-        $this->command->info('Created ' . count($quantities) . ' income records for Mochi Ichigo Daifuku');
-        $this->command->info('Created ' . count($quantities) . ' journal entries');
+        $totalRecords = count($quantities) * $variants->count();
+        $this->command->info('Created ' . $totalRecords . ' income records for Mochi Ichigo Daifuku');
+        $this->command->info('Created ' . $totalRecords . ' journal entries');
+        $this->command->info('Sales percentage distribution: Isi 4 (45.01%), Isi 8 (45.83%), Isi 16 (9.16%)');
     }
 }
