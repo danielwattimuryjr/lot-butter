@@ -22,6 +22,7 @@ def save_forecast(product_id, forecast_result, conn=None):
 def _save_forecast_internal(product_id, forecast_result, conn):
     """
     Internal function to save forecast results using provided connection.
+    Simple structure: week, intercept, slope, trend, seasonal_index, forecast_value
     """
     # Delete existing forecasts for this product
     conn.execute(
@@ -36,49 +37,60 @@ def _save_forecast_internal(product_id, forecast_result, conn):
         print("No forecast data to save")
         return
     
-    # Extract year and week from the datetime index
-    forecast_data['year'] = forecast_data.index.year
-    forecast_data['week'] = forecast_data.index.isocalendar().week
+    # Get intercept and slope from forecast_result metadata
+    intercept = getattr(forecast_result, 'intercept', None)
+    slope = getattr(forecast_result, 'slope', None)
     
-    # Get the last historical data for components if available
-    historical_data = forecast_result[forecast_result['actual'].notna()]
-    
-    # Calculate average trend and residual (but NOT seasonal - each week has its own seasonal index)
-    if not historical_data.empty and 'trend' in historical_data.columns:
-        avg_trend = historical_data['trend'].mean()
-        avg_residual = historical_data['residual'].mean()
+    # Use continuous_week if available, otherwise calculate from index
+    if 'continuous_week' in forecast_data.columns:
+        forecast_data['week'] = forecast_data['continuous_week']
     else:
-        avg_trend = None
-        avg_residual = None
+        # Fallback: extract week from index
+        print("⚠️ Warning: continuous_week not found, using index position")
+        return
     
-    # Insert forecast data - each row uses its own seasonal value
+    # Insert forecast data
     for idx, row in forecast_data.iterrows():
-        # Get seasonal value for this specific week (not average!)
+        # Get values for this specific week
+        week_number = int(row['week'])
         seasonal_value = row.get('seasonal', None)
+        trend_value = row.get('trend', None)
+        forecast_value = row.get('forecast')
+        
+        # Calculate month (1-12, based on 4 weeks per month, repeating every 48 weeks)
+        month = ((week_number - 1) % 48) // 4 + 1
+        
+        # Get actual year from datetime index (2025, 2026, etc.)
+        year = idx.year
         
         conn.execute(
             text("""
                 INSERT INTO forecasts
-                (product_id, year, week, trend_component, seasonal_component, 
-                 irregular_component, forecast_value, created_at, updated_at)
-                VALUES (:product_id, :year, :week, :trend, :seasonal, 
-                        :irregular, :forecast, NOW(), NOW())
+                (product_id, week, month, year, intercept, slope, trend, seasonal_index, forecast_value, created_at, updated_at)
+                VALUES (:product_id, :week, :month, :year, :intercept, :slope, :trend, :seasonal_index, :forecast_value, NOW(), NOW())
                 ON DUPLICATE KEY UPDATE
-                    trend_component = VALUES(trend_component),
-                    seasonal_component = VALUES(seasonal_component),
-                    irregular_component = VALUES(irregular_component),
+                    month = VALUES(month),
+                    year = VALUES(year),
+                    intercept = VALUES(intercept),
+                    slope = VALUES(slope),
+                    trend = VALUES(trend),
+                    seasonal_index = VALUES(seasonal_index),
                     forecast_value = VALUES(forecast_value),
                     updated_at = NOW()
             """),
             {
                 "product_id": product_id,
-                "year": int(row['year']),
-                "week": int(row['week']),
-                "trend": float(avg_trend) if avg_trend and pd.notna(avg_trend) else None,
-                "seasonal": float(seasonal_value) if seasonal_value and pd.notna(seasonal_value) else None,
-                "irregular": float(avg_residual) if avg_residual and pd.notna(avg_residual) else None,
-                "forecast": float(row['forecast'])
+                "week": week_number,
+                "month": month,
+                "year": year,
+                "intercept": float(intercept) if intercept and pd.notna(intercept) else None,
+                "slope": float(slope) if slope and pd.notna(slope) else None,
+                "trend": float(trend_value) if trend_value and pd.notna(trend_value) else None,
+                "seasonal_index": float(seasonal_value) if seasonal_value and pd.notna(seasonal_value) else None,
+                "forecast_value": float(forecast_value)
             }
         )
     
     print(f"✓ Saved {len(forecast_data)} forecast records for product_id {product_id}")
+    print(f"  - Week range: {forecast_data['week'].min()} to {forecast_data['week'].max()}")
+    print(f"  - Intercept: {intercept:.4f}, Slope: {slope:.4f}")

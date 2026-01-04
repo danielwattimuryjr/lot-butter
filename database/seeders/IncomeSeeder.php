@@ -80,7 +80,7 @@ class IncomeSeeder extends Seeder
         foreach ($quantities as $index => $quantity) {
             // Get date for this week
             $date = $startDate->copy()->addWeeks($index);
-            $week = $date->weekOfYear;
+            $week = $index + 1; // Continuous week numbering: 1, 2, 3, ...
 
             // Randomly select a variant
             $variant = $variants->random();

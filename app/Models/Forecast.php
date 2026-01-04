@@ -13,19 +13,19 @@ class Forecast extends Model
         'year',
         'week',
         'month',
-        'trend_component',
-        'seasonal_component',
-        'irregular_component',
-        'forecast_value',
+        'intercept',
+        'seasonal_index',
+        'slope',
+        'trend',
+        'forecast_value'
     ];
 
     protected $casts = [
-        'year' => 'integer',
-        'week' => 'integer',
-        'trend_component' => 'decimal:4',
-        'seasonal_component' => 'decimal:4',
-        'irregular_component' => 'decimal:4',
         'forecast_value' => 'decimal:2',
+        'intercept' => 'decimal:4',
+        'slope' => 'decimal:4',
+        'trend' => 'decimal:4',
+        'seasonal_index' => 'decimal:4',
     ];
 
     /**

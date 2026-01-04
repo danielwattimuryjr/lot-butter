@@ -34,7 +34,6 @@ def process_product(product_id, conn):
             forecast_data = result[result['forecast'].notna()]
             if not forecast_data.empty:
                 print(f"\n✓ Generated forecast for next 40 weeks")
-                print(forecast_data[['forecast', 'lower_bound', 'upper_bound']].head(5))
                 
                 print(f"\n✓ Saving forecast to database...")
                 save_forecast(product_id, result, conn)
