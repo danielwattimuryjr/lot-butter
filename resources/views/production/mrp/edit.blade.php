@@ -30,7 +30,7 @@
                 </a>
             @elseif ($level == "1")
                 <a
-                    href="{{ route("employee.production.mrp.level1", $product) }}"
+                    href="{{ route("employee.production.mrp.level1", [$product, $entity]) }}"
                     class="text-gray-500 transition-colors hover:text-gray-900"
                 >
                     Level 1 - {{ $entityName }}
@@ -198,7 +198,7 @@
                 <!-- Form Actions -->
                 <div class="flex items-center justify-end gap-4 border-t border-gray-200 pt-4">
                     <a
-                        href="{{ $level == "0" ? route("employee.production.mrp.level0", [$product, $entity]) : ($level == "1" ? route("employee.production.mrp.level1", $product) : route("employee.production.mrp.level2", [$product, $entity])) }}"
+                        href="{{ $level == "0" ? route("employee.production.mrp.level0", [$product, $entity]) : ($level == "1" ? route("employee.production.mrp.level1", [$product, $entity]) : route("employee.production.mrp.level2", [$product, $entity])) }}"
                         class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
                     >
                         Cancel
