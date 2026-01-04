@@ -50,6 +50,9 @@ def _save_forecast_internal(product_id, forecast_result, conn):
         return
     
     # Insert forecast data
+    prev_month = None
+    current_year = None
+    
     for idx, row in forecast_data.iterrows():
         # Get values for this specific week
         week_number = int(row['week'])
@@ -60,8 +63,14 @@ def _save_forecast_internal(product_id, forecast_result, conn):
         # Calculate month (1-12, based on 4 weeks per month, repeating every 48 weeks)
         month = ((week_number - 1) % 48) // 4 + 1
         
-        # Get actual year from datetime index (2025, 2026, etc.)
-        year = idx.year
+        # Initialize year from first datetime or increment when month resets
+        if current_year is None:
+            current_year = idx.year
+        elif prev_month is not None and month < prev_month:
+            # Month went from 12 to 1, increment year
+            current_year += 1
+        
+        prev_month = month
         
         conn.execute(
             text("""
@@ -82,7 +91,7 @@ def _save_forecast_internal(product_id, forecast_result, conn):
                 "product_id": product_id,
                 "week": week_number,
                 "month": month,
-                "year": year,
+                "year": current_year,
                 "intercept": float(intercept) if intercept and pd.notna(intercept) else None,
                 "slope": float(slope) if slope and pd.notna(slope) else None,
                 "trend": float(trend_value) if trend_value and pd.notna(trend_value) else None,
