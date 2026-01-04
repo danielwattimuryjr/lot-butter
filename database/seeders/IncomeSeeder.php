@@ -90,10 +90,10 @@ class IncomeSeeder extends Seeder
             $amount = $quantity * $unitPrice;
 
             $income = Income::create([
-                'code' => 'INC-'.str_pad($index + 1, 4, '0', STR_PAD_LEFT),
+                'code' => 'INC-' . str_pad($index + 1, 4, '0', STR_PAD_LEFT),
                 'product_id' => $product->id,
                 'product_variant_id' => $variant->id,
-                'description' => 'Penjualan minggu ke-'.$week.' - '.$product->name.' ('.$variant->name.')',
+                'description' => 'Historical Week ' . $week,
                 'quantity' => $quantity,
                 'unit_price' => $unitPrice,
                 'amount' => $amount,
@@ -105,7 +105,7 @@ class IncomeSeeder extends Seeder
             $journalService->createFromIncome($income);
         }
 
-        $this->command->info('Created '.count($quantities).' income records for Mochi Ichigo Daifuku');
-        $this->command->info('Created '.count($quantities).' journal entries');
+        $this->command->info('Created ' . count($quantities) . ' income records for Mochi Ichigo Daifuku');
+        $this->command->info('Created ' . count($quantities) . ' journal entries');
     }
 }

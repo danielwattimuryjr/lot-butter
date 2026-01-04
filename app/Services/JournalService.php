@@ -13,9 +13,9 @@ class JournalService
         return Journal::create([
             'code' => $this->generateJournalCode(),
             'date' => $income->date_received,
-            'description' => 'Revenue - '.$income->description,
-            'debit' => $income->amount,
-            'credit' => null,
+            'description' => 'Revenue - ' . $income->description,
+            'debit' => null,
+            'credit' => $income->amount,
             'balance' => $lastBalance + $income->amount,
             'transaction_type' => 'income',
             'reference_table' => 'incomes',
@@ -31,9 +31,9 @@ class JournalService
         return Journal::create([
             'code' => $this->generateJournalCode(),
             'date' => $purchase->date,
-            'description' => 'Purchase - '.$purchase->description,
-            'debit' => null,
-            'credit' => $purchase->total_amount,
+            'description' => 'Purchase - ' . $purchase->description,
+            'debit' => $purchase->total_amount,
+            'credit' => null,
             'balance' => $lastBalance - $purchase->total_amount,
             'transaction_type' => 'purchase',
             'reference_table' => 'purchases',
@@ -53,8 +53,8 @@ class JournalService
 
             $journal->update([
                 'date' => $income->date_received,
-                'description' => 'Revenue - '.$income->description,
-                'debit' => $income->amount,
+                'description' => 'Revenue - ' . $income->description,
+                'credit' => $income->amount,
                 'balance' => $previousBalance + $income->amount,
             ]);
 
@@ -73,8 +73,8 @@ class JournalService
 
             $journal->update([
                 'date' => $purchase->date,
-                'description' => 'Purchase - '.$purchase->description,
-                'credit' => $purchase->total_amount,
+                'description' => 'Purchase - ' . $purchase->description,
+                'debit' => $purchase->total_amount,
                 'balance' => $previousBalance - $purchase->total_amount,
             ]);
 
@@ -127,7 +127,7 @@ class JournalService
         $runningBalance = $this->getBalanceBefore($journalId);
 
         foreach ($journals as $journal) {
-            $amount = ($journal->debit ?? 0) - ($journal->credit ?? 0);
+            $amount = ($journal->credit ?? 0) - ($journal->debit ?? 0);
             $runningBalance += $amount;
             $journal->update(['balance' => $runningBalance]);
         }
@@ -137,9 +137,9 @@ class JournalService
     {
         $lastJournal = Journal::latest('id')->first();
         $lastNumber = $lastJournal
-          ? intval(substr($lastJournal->code, 1))
-          : 0;
+            ? intval(substr($lastJournal->code, 1))
+            : 0;
 
-        return 'J'.str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+        return 'J' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
     }
 }
