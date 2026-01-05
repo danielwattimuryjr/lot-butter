@@ -93,6 +93,22 @@
                     @enderror
                 </div>
 
+                <div>
+                    <label class="flex cursor-pointer items-center gap-2">
+                        <input
+                            type="checkbox"
+                            name="is_level2_parent"
+                            value="1"
+                            {{ old("is_level2_parent", $bom->is_level2_parent) ? "checked" : "" }}
+                            class="rounded border-gray-300 text-butter-500 focus:ring-butter-400"
+                        />
+                        <span class="text-sm font-medium text-gray-900">Level 2 Parent</span>
+                    </label>
+                    <p class="mt-1 text-xs text-gray-500">
+                        Only one Level 1 component can be marked as Level 2 Parent per product
+                    </p>
+                </div>
+
                 <button
                     type="submit"
                     class="rounded-full bg-gray-900 px-12 py-3 font-medium text-white transition-colors hover:bg-gray-800"

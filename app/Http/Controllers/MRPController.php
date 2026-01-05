@@ -36,7 +36,7 @@ class MRPController extends Controller
         $allLevel1Components = Component::whereIn('id', function ($query) use ($product) {
             $query->select('component_id')
                 ->from('bill_of_materials')
-                ->where('level', 1)
+                ->where('level', '1')
                 ->where(function ($q) use ($product) {
                     $q->where('product_id', $product->id)
                         ->orWhereIn('product_variant_id', $product->variants->pluck('id'));
@@ -44,12 +44,13 @@ class MRPController extends Controller
                 ->distinct();
         })->get();
 
+
         // Get Level 2 components from Product BOM
         $level2Components = Component::whereIn('id', function ($query) use ($product) {
             $query->select('component_id')
                 ->from('bill_of_materials')
                 ->where('product_id', $product->id)
-                ->where('level', 2);
+                ->where('level', '2');
         })->get();
 
         return view('production.mrp.overview', compact(
@@ -62,11 +63,11 @@ class MRPController extends Controller
     /**
      * Show MRP table for Level 0 (Variant)
      */
-    public function level0(Product $product, ProductVariant $variant)
+    public function level0(Request $request, Product $product, ProductVariant $variant)
     {
         $todayDate = Carbon::now();
-        $currentMonth = $todayDate->month;
-        $currentYear = $todayDate->year;
+        $currentMonth = $request->input('month', $todayDate->month);
+        $currentYear = $request->input('year', $todayDate->year);
 
         // Get MPS data for this variant (for Gross Requirements)
         $mpsData = MasterProductionSchedule::where('product_variant_id', $variant->id)
@@ -75,20 +76,28 @@ class MRPController extends Controller
             ->get()
             ->keyBy('week');
 
-        // Get beginning inventory
-        $mpsRecord = MasterProductionSchedule::where('product_variant_id', $variant->id)
-            ->where('year', $currentYear)
-            ->where('month', $currentMonth)
-            ->first();
-        $beginningInventory = $mpsRecord->beginning_inventory ?? 0;
+        // MRP beginning inventory is always 0 (doesn't inherit from MPS)
+        $beginningInventory = 0;
 
-        // Get forecast data for this month only
+        // Get forecast data for this month
         $forecasts = DB::table('forecasts')
             ->where('product_id', $product->id)
             ->where('year', $currentYear)
-            ->whereRaw('MONTH(STR_TO_DATE(CONCAT(year, \'-W\', LPAD(week, 2, \'0\'), \'-1\'), \'%X-W%V-%w\')) = ?', [$currentMonth])
+            ->where('month', $currentMonth)
             ->orderBy('week')
             ->get();
+
+        // Calculate sales percentage for this variant
+        $totalSales = DB::table('incomes')
+            ->where('product_id', $product->id)
+            ->sum('quantity');
+
+        $variantSales = DB::table('incomes')
+            ->where('product_id', $product->id)
+            ->where('product_variant_id', $variant->id)
+            ->sum('quantity');
+
+        $salesPercentage = $totalSales > 0 ? ($variantSales / $totalSales) * 100 : 0;
 
         // Get edited MRP records
         $mrpRecords = MaterialRequirementsPlanning::where('level', '0')
@@ -105,7 +114,8 @@ class MRPController extends Controller
             'mrpRecords',
             'currentYear',
             'currentMonth',
-            'beginningInventory'
+            'beginningInventory',
+            'salesPercentage'
         ))->with('level', '0')->with('entityName', $variant->name)->with('entity', $variant);
     }
 
@@ -118,20 +128,20 @@ class MRPController extends Controller
     public function level1(Product $product, Component $component)
     {
         $todayDate = Carbon::now();
-        $currentMonth = $todayDate->month;
-        $currentYear = $todayDate->year;
+        $currentMonth = request()->input('month', $todayDate->month);
+        $currentYear = request()->input('year', $todayDate->year);
 
         // Get all BOM entries for this component (both product-level and variant-level)
         $productBom = DB::table('bill_of_materials')
             ->where('product_id', $product->id)
             ->where('component_id', $component->id)
-            ->where('level', 1)
+            ->where('level', '1')
             ->whereNull('product_variant_id')
             ->first();
 
         $variantBoms = DB::table('bill_of_materials')
             ->where('component_id', $component->id)
-            ->where('level', 1)
+            ->where('level', '1')
             ->whereIn('product_variant_id', $product->variants->pluck('id'))
             ->get();
 
@@ -139,25 +149,20 @@ class MRPController extends Controller
             abort(404, 'Component not found in any BOM');
         }
 
-        // Get aggregated beginning inventory
-        $variantIds = $product->variants->pluck('id');
-        $beginningInventory = MasterProductionSchedule::whereIn('product_variant_id', $variantIds)
-            ->where('year', $currentYear)
-            ->where('month', $currentMonth)
-            ->sum('beginning_inventory');
+        // MRP beginning inventory is always 0
+        $beginningInventory = 0;
 
-        // Get forecast data for this month only
+        // Get forecast data for this month
         $forecasts = DB::table('forecasts')
             ->where('product_id', $product->id)
             ->where('year', $currentYear)
-            ->whereRaw('MONTH(STR_TO_DATE(CONCAT(year, \'-W\', LPAD(week, 2, \'0\'), \'-1\'), \'%X-W%V-%w\')) = ?', [$currentMonth])
+            ->where('month', $currentMonth)
             ->orderBy('week')
             ->get();
 
-        // Get MPS data for all variants (keyed by variant_id and week)
+        // Get MPS data for all variants
         $mpsData = MasterProductionSchedule::whereIn('product_variant_id', $product->variants->pluck('id'))
             ->where('year', $currentYear)
-            ->where('month', $currentMonth)
             ->get()
             ->groupBy('product_variant_id');
 
@@ -188,36 +193,73 @@ class MRPController extends Controller
     public function level2(Product $product, Component $component)
     {
         $todayDate = Carbon::now();
-        $currentMonth = $todayDate->month;
-        $currentYear = $todayDate->year;
+        $currentMonth = request()->input('month', $todayDate->month);
+        $currentYear = request()->input('year', $todayDate->year);
 
-        // Get BOM quantity for this component
+        // Get BOM quantity for this Level 2 component
+        // Priority 1: Product-level BOM
         $bom = BillOfMaterial::where('product_id', $product->id)
             ->where('component_id', $component->id)
+            ->where('level', '2')
+            ->whereNull('product_variant_id')
             ->first();
 
-        $bomQuantity = $bom ? $bom->quantity : 0;
+        $bomQuantity = 0;
+        $bomSource = 'product'; // Track where BOM came from
 
-        // Get all variant IDs for this product
-        $variantIds = $product->variants->pluck('id');
+        if ($bom) {
+            $bomQuantity = $bom->quantity;
+        } else {
+            // Priority 2: Variant-level BOM (take first one if exists)
+            $variantBom = BillOfMaterial::where('component_id', $component->id)
+                ->where('level', '2')
+                ->whereIn('product_variant_id', $product->variants->pluck('id'))
+                ->first();
 
-        // Get aggregated beginning inventory
-        $beginningInventory = MasterProductionSchedule::whereIn('product_variant_id', $variantIds)
-            ->where('year', $currentYear)
-            ->where('month', $currentMonth)
-            ->sum('beginning_inventory');
+            if ($variantBom) {
+                $bomQuantity = $variantBom->quantity;
+                $bomSource = 'variant';
+            }
+        }
 
-        // Get forecast data for this month only
+        // MRP beginning inventory is always 0
+        $beginningInventory = 0;
+
+        // Get forecast data for this month
         $forecasts = DB::table('forecasts')
             ->where('product_id', $product->id)
             ->where('year', $currentYear)
-            ->whereRaw('MONTH(STR_TO_DATE(CONCAT(year, \'-W\', LPAD(week, 2, \'0\'), \'-1\'), \'%X-W%V-%w\')) = ?', [$currentMonth])
+            ->where('month', $currentMonth)
             ->orderBy('week')
             ->get();
 
-        // Get edited MRP records
+        // Find the Level 1 parent component using is_level2_parent flag
+        $parentBom = DB::table('bill_of_materials')
+            ->where('product_id', $product->id)
+            ->where('level', '1')
+            ->where('is_level2_parent', true)
+            ->first();
+
+        // Get all BOM entries for the parent Level 1 component (across all variants)
+        $parentVariantBoms = collect();
+        if ($parentBom) {
+            $parentVariantBoms = DB::table('bill_of_materials')
+                ->where('component_id', $parentBom->component_id)
+                ->where('level', '1')
+                ->whereIn('product_variant_id', $product->variants->pluck('id'))
+                ->get();
+        }
+
+        // Get MPS data for all variants
+        $mpsData = MasterProductionSchedule::whereIn('product_variant_id', $product->variants->pluck('id'))
+            ->where('year', $currentYear)
+            ->get()
+            ->groupBy('product_variant_id');
+
+        // Get edited MRP records for this Level 2 component
         $mrpRecords = MaterialRequirementsPlanning::where('level', '2')
             ->where('component_id', $component->id)
+            ->where('product_id', $product->id)
             ->where('year', $currentYear)
             ->get()
             ->keyBy('week');
@@ -230,7 +272,10 @@ class MRPController extends Controller
             'currentYear',
             'currentMonth',
             'bomQuantity',
-            'beginningInventory'
+            'bomSource',
+            'beginningInventory',
+            'mpsData',
+            'parentVariantBoms'
         ))->with('level', '2')->with('entityName', $component->name)->with('entity', $component)->with('variant', null);
     }
 
@@ -269,10 +314,10 @@ class MRPController extends Controller
             ->where('year', $year)
             ->where('week', $week)
             ->where('component_id', $entityId)
-            ->when($level == '0', fn ($q) => $q->where('product_variant_id', $entityId))
-            ->when($level == '1' && isset($variantId) && $variantId, fn ($q) => $q->where('product_variant_id', $variantId))
-            ->when($level == '1' && (! isset($variantId) || ! $variantId), fn ($q) => $q->where('product_id', $product->id))
-            ->when($level == '2', fn ($q) => $q->where('product_id', $product->id))
+            ->when($level == '0', fn($q) => $q->where('product_variant_id', $entityId))
+            ->when($level == '1' && isset($variantId) && $variantId, fn($q) => $q->where('product_variant_id', $variantId))
+            ->when($level == '1' && (! isset($variantId) || ! $variantId), fn($q) => $q->where('product_id', $product->id))
+            ->when($level == '2', fn($q) => $q->where('product_id', $product->id))
             ->first();
 
         return view('production.mrp.edit', compact(
@@ -302,7 +347,6 @@ class MRPController extends Controller
                 'component_id' => 'nullable|exists:components,id',
                 'year' => 'required|integer',
                 'week' => 'required|integer',
-                'scheduled_receipts' => 'nullable|integer|min:0',
                 'projected_on_hand' => 'nullable|integer',
                 'planned_order_receipts' => 'nullable|integer|min:0',
                 'planned_order_releases' => 'nullable|integer|min:0',
@@ -373,7 +417,7 @@ class MRPController extends Controller
         } catch (Exception $th) {
             DB::rollBack();
 
-            return back()->with('error', 'Failed to update MRP values: '.$th->getMessage());
+            return back()->with('error', 'Failed to update MRP values: ' . $th->getMessage());
         }
     }
 }

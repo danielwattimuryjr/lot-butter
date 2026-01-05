@@ -26,9 +26,17 @@ class Component extends Model
      */
     public function products(): BelongsToMany
     {
-        return $this->belongsToMany(Product::class, 'bills_of_materials')
+        return $this->belongsToMany(Product::class, 'bill_of_materials', 'component_id', 'product_id')
             ->using(BillOfMaterial::class)
-            ->withPivot('quantity');
+            ->withPivot(['quantity', 'level', 'id', 'is_level2_parent']);
+    }
+
+    /**
+     * Get all bill of materials for this component
+     */
+    public function billOfMaterials()
+    {
+        return $this->hasMany(BillOfMaterial::class, 'component_id');
     }
 
     public function purchases()

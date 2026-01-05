@@ -7,41 +7,46 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class BillOfMaterial extends Pivot
 {
-    protected $table = 'bill_of_materials';
+  protected $table = 'bill_of_materials';
 
-    public $timestamps = false;
+  public $timestamps = false;
 
-    public $incrementing = true;
+  public $incrementing = true;
 
-    protected $fillable = [
-        'product_id',
-        'product_variant_id',
-        'component_id',
-        'quantity',
-        'level',
-    ];
+  protected $fillable = [
+    'product_id',
+    'product_variant_id',
+    'component_id',
+    'quantity',
+    'level',
+    'is_level2_parent',
+  ];
 
-    /**
-     * Get the product that owns the bill of material.
-     */
-    public function product(): BelongsTo
-    {
-        return $this->belongsTo(Product::class);
-    }
+  protected $casts = [
+    'is_level2_parent' => 'boolean',
+  ];
 
-    /**
-     * Get the product variant that owns the bill of material.
-     */
-    public function productVariant(): BelongsTo
-    {
-        return $this->belongsTo(ProductVariant::class);
-    }
+  /**
+   * Get the product that owns the bill of material.
+   */
+  public function product(): BelongsTo
+  {
+    return $this->belongsTo(Product::class);
+  }
 
-    /**
-     * Get the component for the bill of material.
-     */
-    public function component(): BelongsTo
-    {
-        return $this->belongsTo(Component::class);
-    }
+  /**
+   * Get the product variant that owns the bill of material.
+   */
+  public function productVariant(): BelongsTo
+  {
+    return $this->belongsTo(ProductVariant::class);
+  }
+
+  /**
+   * Get the component for the bill of material.
+   */
+  public function component(): BelongsTo
+  {
+    return $this->belongsTo(Component::class);
+  }
 }

@@ -113,47 +113,27 @@
                 </div>
 
                 @if ($week == 0)
-                    <!-- Initial Projected On Hand for Week 0 -->
+                    <!-- Planned Order Releases for Week 0 -->
                     <div>
-                        <label for="projected_on_hand" class="block text-sm font-medium text-gray-700">
-                            Initial Projected On Hand
+                        <label for="planned_order_releases" class="block text-sm font-medium text-gray-700">
+                            Planned Order Releases
                         </label>
                         <p class="mt-1 text-xs text-gray-500">
-                            This is the starting inventory value for this MRP level.
+                            Orders to release in week 0 (accounting for lead time).
                         </p>
                         <input
                             type="number"
-                            id="projected_on_hand"
-                            name="projected_on_hand"
-                            value="{{ old("projected_on_hand", $mrpRecord?->projected_on_hand ?? 0) }}"
+                            id="planned_order_releases"
+                            name="planned_order_releases"
+                            min="0"
+                            value="{{ old("planned_order_releases", $mrpRecord?->planned_order_releases ?? 0) }}"
                             class="mt-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-butter-400 focus:ring focus:ring-butter-200 focus:ring-opacity-50"
                         />
-                        @error("projected_on_hand")
+                        @error("planned_order_releases")
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
                 @else
-                    <!-- Scheduled Receipts -->
-                    <div>
-                        <label for="scheduled_receipts" class="block text-sm font-medium text-gray-700">
-                            Scheduled Receipts
-                        </label>
-                        <p class="mt-1 text-xs text-gray-500">
-                            Orders expected to be received this week (confirmed orders in transit).
-                        </p>
-                        <input
-                            type="number"
-                            id="scheduled_receipts"
-                            name="scheduled_receipts"
-                            min="0"
-                            value="{{ old("scheduled_receipts", $mrpRecord?->scheduled_receipts ?? 0) }}"
-                            class="mt-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-butter-400 focus:ring focus:ring-butter-200 focus:ring-opacity-50"
-                        />
-                        @error("scheduled_receipts")
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-
                     <!-- Planned Order Receipts -->
                     <div>
                         <label for="planned_order_receipts" class="block text-sm font-medium text-gray-700">

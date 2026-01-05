@@ -22,7 +22,7 @@ class BOMController extends Controller
         if (! $productId) {
             $products = Product::query()
                 ->when($search, function ($query, $search) {
-                    $query->where('name', 'like', '%'.$search.'%');
+                    $query->where('name', 'like', '%' . $search . '%');
                 })
                 ->get();
 
@@ -71,12 +71,27 @@ class BOMController extends Controller
         $variantId = $request->input('variant_id');
 
         foreach ($validated['components'] as $componentData) {
+            $isLevel2Parent = isset($componentData['is_level2_parent']) && $componentData['is_level2_parent'];
+
+            // Validation: Only one Level 1 component can be Level 2 Parent per product
+            if ($isLevel2Parent && $componentData['level'] == 1) {
+                // Check if there's already a Level 2 parent for this product
+                $existingParent = BillOfMaterial::where('product_id', $productId)
+                    ->where('is_level2_parent', true)
+                    ->exists();
+
+                if ($existingParent) {
+                    return redirect()->back()->with('error', 'Only one Level 1 component can be marked as Level 2 Parent per product');
+                }
+            }
+
             BillOfMaterial::create([
                 'product_id' => $variantId ? null : $productId,
                 'product_variant_id' => $variantId ?: null,
                 'component_id' => $componentData['component_id'],
                 'quantity' => $componentData['quantity'],
                 'level' => $componentData['level'],
+                'is_level2_parent' => $isLevel2Parent && $componentData['level'] == 1,
             ]);
         }
 
@@ -112,10 +127,26 @@ class BOMController extends Controller
         $variantId = $request->input('variant_id');
 
         $bom = BillOfMaterial::findOrFail($bomId);
+
+        $isLevel2Parent = $request->has('is_level2_parent') && $validated['level'] == 1;
+
+        // Validation: Only one Level 1 component can be Level 2 Parent per product
+        if ($isLevel2Parent) {
+            $existingParent = BillOfMaterial::where('product_id', $productId)
+                ->where('is_level2_parent', true)
+                ->where('id', '!=', $bomId)
+                ->exists();
+
+            if ($existingParent) {
+                return redirect()->back()->with('error', 'Only one Level 1 component can be marked as Level 2 Parent per product');
+            }
+        }
+
         $bom->update([
             'component_id' => $validated['component_id'],
             'quantity' => $validated['quantity'],
             'level' => $validated['level'],
+            'is_level2_parent' => $isLevel2Parent,
         ]);
 
         return redirect()->route('employee.production.bill-of-materials.index', [

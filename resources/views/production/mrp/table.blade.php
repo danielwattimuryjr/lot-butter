@@ -29,15 +29,75 @@
             <p class="mt-1 text-sm text-gray-600">
                 @if ($level == "0")
                     Variant-level MRP - Gross Requirements from MPS
+                    @if (isset($salesPercentage))
+                        <br />
+                        <span class="font-semibold text-butter-600">
+                            Sales Percentage: {{ number_format($salesPercentage, 2) }}%
+                        </span>
+                    @endif
                 @elseif ($level == "1")
                     Product Aggregate - Gross Requirements = SUM(MPS from all variants)
                 @else
                     Component Level - Gross Requirements = SUM(MPS all variants) × BOM Quantity
                     ({{ $bomQuantity ?? 0 }})
+                    @if (isset($bomSource))
+                        <span class="text-xs text-gray-500">
+                            [From {{ $bomSource == "product" ? "Product BOM" : "Variant BOM" }}]
+                        </span>
+                    @endif
                 @endif
             </p>
             <div class="mt-2 border-b border-gray-200"></div>
         </div>
+
+        <!-- Month and Year Selector -->
+        @if ($level == "0" || $level == "1" || $level == "2")
+            <div class="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+                <form
+                    method="GET"
+                    action="{{ $level == "0" ? route("employee.production.mrp.level0", [$product, $variant]) : ($level == "1" ? route("employee.production.mrp.level1", [$product, $component]) : route("employee.production.mrp.level2", [$product, $component])) }}"
+                    class="flex items-end gap-4"
+                >
+                    <div class="flex-1">
+                        <label for="month" class="mb-1 block text-sm font-medium text-gray-700">Month</label>
+                        <select
+                            name="month"
+                            id="month"
+                            class="w-full rounded-lg border-gray-300 focus:border-butter-500 focus:ring-butter-500"
+                        >
+                            @for ($m = 1; $m <= 12; $m++)
+                                <option value="{{ $m }}" {{ $currentMonth == $m ? "selected" : "" }}>
+                                    {{ \Carbon\Carbon::create()->month($m)->format("F") }}
+                                </option>
+                            @endfor
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <label for="year" class="mb-1 block text-sm font-medium text-gray-700">Year</label>
+                        <select
+                            name="year"
+                            id="year"
+                            class="w-full rounded-lg border-gray-300 focus:border-butter-500 focus:ring-butter-500"
+                        >
+                            @for ($y = 2025; $y <= 2030; $y++)
+                                <option value="{{ $y }}" {{ $currentYear == $y ? "selected" : "" }}>
+                                    {{ $y }}
+                                </option>
+                            @endfor
+                        </select>
+                    </div>
+                    <div>
+                        <button
+                            type="submit"
+                            class="inline-flex items-center gap-2 rounded-lg bg-butter-500 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-butter-600"
+                        >
+                            <x-heroicon-o-magnifying-glass class="h-5 w-5" />
+                            Search
+                        </button>
+                    </div>
+                </form>
+            </div>
+        @endif
 
         @if (auth()->user()->team->name == "Production")
             <!-- Action Buttons -->
@@ -112,46 +172,115 @@
 
                                 // Calculate Gross Requirement based on level
                                 if ($level == "0") {
-                                    // Level 0: Use MPS Available (the planned production for this variant)
-                                    // If MPS not set, calculate from forecast
-                                    $mps = $mpsData->get($week);
-                                    if ($mps && $mps->available > 0) {
-                                        $grossRequirement = $mps->available;
+                                    // Level 0: Calculate MPS value (Forecast - POH previous week)
+                                    // This matches the MPS calculation
+                                    $forecastDemand = floor(($forecast->forecast_value * $salesPercentage) / 100 / ($variant->number ?? 1));
+
+                                    // Get POH from previous week (or beginning inventory for first week)
+                                    if ($index == 0) {
+                                        // First week: use MPS beginning inventory (not MRP beginning inventory)
+                                        $mpsBeginningRecord = $mpsData->get(0);
+                                        $prevPOH = $mpsBeginningRecord?->beginning_inventory ?? 0;
                                     } else {
-                                        // Fallback: calculate from forecast
-                                        $grossRequirement = ceil($forecast->forecast_value / ($variant->number ?? 1));
+                                        // Use POH from previous week in MPS
+                                        $prevWeek = $forecasts[$index - 1]->week;
+                                        $prevMps = $mpsData->get($prevWeek);
+                                        $prevPOH = $prevMps?->projected_on_hand ?? 0;
                                     }
+
+                                    // MPS = Forecast - POH(previous)
+                                    $grossRequirement = $forecastDemand - $prevPOH;
                                 } elseif ($level == "1") {
-                                    // Level 1: Only use Variant BOMs (exclude Product BOM to avoid double counting)
-                                    // Use MPS Available = forecast / variant.number (same as MPS calculation)
+                                    // Level 1: SUM(MPS value × BOM quantity) from all variants that use this component
                                     $totalGrossReq = 0;
 
-                                    // Only calculate from variant-level BOM: SUM(MPS × BOM qty)
+                                    // Calculate from variant-level BOMs
                                     if (isset($variantBoms) && $variantBoms->isNotEmpty()) {
                                         foreach ($variantBoms as $bomEntry) {
-                                            // Get MPS Available (or calculate from forecast)
                                             $variantMpsRecords = $mpsData->get($bomEntry->product_variant_id);
-                                            $mpsAvailable = 0;
-                                            if ($variantMpsRecords) {
-                                                $mps = $variantMpsRecords->firstWhere("week", $week);
-                                                $mpsAvailable = $mps?->available ?? 0;
+
+                                            // Get variant info untuk sales percentage
+                                            $variantObj = $product->variants->firstWhere("id", $bomEntry->product_variant_id);
+                                            if (! $variantObj) {
+                                                continue;
                                             }
-                                            // If MPS not set, calculate: forecast / variant.number
-                                            if ($mpsAvailable == 0) {
-                                                $variantObj = $product->variants->firstWhere("id", $bomEntry->product_variant_id);
-                                                if ($variantObj) {
-                                                    $mpsAvailable = ceil($forecast->forecast_value / $variantObj->number);
-                                                }
+
+                                            // Calculate sales percentage for this variant
+                                            $totalSales = \DB::table("incomes")
+                                                ->where("product_id", $product->id)
+                                                ->sum("quantity");
+                                            $variantSales = \DB::table("incomes")
+                                                ->where("product_id", $product->id)
+                                                ->where("product_variant_id", $variantObj->id)
+                                                ->sum("quantity");
+                                            $variantSalesPercentage = $totalSales > 0 ? ($variantSales / $totalSales) * 100 : 0;
+
+                                            // Calculate forecast demand for this variant
+                                            $forecastDemandVariant = floor(($forecast->forecast_value * $variantSalesPercentage) / 100 / $variantObj->number);
+
+                                            // Get POH from previous week for this variant
+                                            if ($index == 0) {
+                                                $mpsBeginningRecord = $variantMpsRecords?->firstWhere("week", 0);
+                                                $prevPOHVariant = $mpsBeginningRecord?->beginning_inventory ?? 0;
+                                            } else {
+                                                $prevWeek = $forecasts[$index - 1]->week;
+                                                $prevMpsVariant = $variantMpsRecords?->firstWhere("week", $prevWeek);
+                                                $prevPOHVariant = $prevMpsVariant?->projected_on_hand ?? 0;
                                             }
-                                            // Variant BOM: MPS × BOM qty
-                                            $totalGrossReq += $mpsAvailable * $bomEntry->quantity;
+
+                                            // MPS value = Forecast - POH(previous)
+                                            $mpsValue = $forecastDemandVariant - $prevPOHVariant;
+
+                                            // Multiply by BOM quantity
+                                            $totalGrossReq += $mpsValue * $bomEntry->quantity;
                                         }
                                     }
 
                                     $grossRequirement = $totalGrossReq;
                                 } else {
-                                    // Level 2: Gross Req = forecast value × BOM quantity
-                                    $grossRequirement = ceil($forecast->forecast_value) * ($bomQuantity ?? 1);
+                                    // Level 2: Calculate Level 1 parent Gross Requirement, then multiply by Level 2 BOM quantity
+                                    $level1GrossReq = 0;
+
+                                    if (isset($parentVariantBoms) && $parentVariantBoms->isNotEmpty()) {
+                                        foreach ($parentVariantBoms as $bomEntry) {
+                                            $variantObj = $product->variants->firstWhere("id", $bomEntry->product_variant_id);
+                                            if (! $variantObj) {
+                                                continue;
+                                            }
+
+                                            // Calculate sales percentage
+                                            $totalSales = \DB::table("incomes")
+                                                ->where("product_id", $product->id)
+                                                ->sum("quantity");
+                                            $variantSales = \DB::table("incomes")
+                                                ->where("product_id", $product->id)
+                                                ->where("product_variant_id", $variantObj->id)
+                                                ->sum("quantity");
+                                            $variantSalesPercentage = $totalSales > 0 ? ($variantSales / $totalSales) * 100 : 0;
+
+                                            $forecastDemandVariant = floor(($forecast->forecast_value * $variantSalesPercentage) / 100 / $variantObj->number);
+
+                                            // Get POH from previous week
+                                            $variantMpsRecords = $mpsData->get($variantObj->id);
+                                            if ($index == 0) {
+                                                $mpsBeginningRecord = $variantMpsRecords?->firstWhere("week", 0);
+                                                $prevPOHVariant = $mpsBeginningRecord?->beginning_inventory ?? 0;
+                                            } else {
+                                                $prevWeek = $forecasts[$index - 1]->week;
+                                                $prevMpsVariant = $variantMpsRecords?->firstWhere("week", $prevWeek);
+                                                $prevPOHVariant = $prevMpsVariant?->projected_on_hand ?? 0;
+                                            }
+
+                                            // MPS value = Forecast - POH(previous)
+                                            $mpsValue = $forecastDemandVariant - $prevPOHVariant;
+
+                                            // Level 1 Gross Requirement = MPS value × Level 1 BOM quantity
+                                            $level1GrossReq += $mpsValue * $bomEntry->quantity;
+                                        }
+                                    }
+
+                                    // Level 2 Gross Requirement = Level 1 Gross Requirement × Level 2 BOM quantity
+                                    $grossRequirement = $level1GrossReq * ($bomQuantity ?? 1);
                                 }
 
                                 // Get manual inputs
@@ -260,7 +389,16 @@
                             <td class="border border-gray-200 px-4 py-4 text-sm font-medium text-gray-700">
                                 Planned Order Releases
                             </td>
-                            <td class="border border-gray-200 px-4 py-4 text-center text-sm text-gray-700">-</td>
+                            @php
+                                $week0Record = $mrpRecords->get(0);
+                                $week0PlannedOrderReleases = $week0Record?->planned_order_releases ?? 0;
+                            @endphp
+
+                            <td
+                                class="@if ($week0Record && $week0Record->is_edited && $week0PlannedOrderReleases > 0) font-semibold text-orange-600 @else text-gray-700 @endif border border-gray-200 px-4 py-4 text-center text-sm"
+                            >
+                                {{ $week0PlannedOrderReleases > 0 ? number_format($week0PlannedOrderReleases) : "-" }}
+                            </td>
                             @foreach ($forecasts as $forecast)
                                 <td
                                     class="@if ($weeklyData[$forecast->week]["is_edited"] ?? false) font-semibold text-orange-600 @else text-gray-700 @endif border border-gray-200 px-4 py-4 text-center text-sm"

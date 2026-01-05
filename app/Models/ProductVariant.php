@@ -32,8 +32,8 @@ class ProductVariant extends Model
      */
     public function components(): BelongsToMany
     {
-        return $this->belongsToMany(Component::class, 'bill_of_materials', 'product_variant_id')
+        return $this->belongsToMany(Component::class, 'bill_of_materials', 'product_variant_id', 'component_id')
             ->using(BillOfMaterial::class)
-            ->withPivot(['quantity', 'level', 'id']);
+            ->withPivot(['quantity', 'level', 'id', 'is_level2_parent']);
     }
 }

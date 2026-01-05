@@ -128,6 +128,19 @@
                             <option value="2">2</option>
                         </select>
                     </div>
+
+                    <div class="md:col-span-2">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                name="components[${componentCount}][is_level2_parent]"
+                                value="1"
+                                class="rounded border-gray-300 text-butter-500 focus:ring-butter-400"
+                            />
+                            <span class="text-sm font-medium text-gray-900">Level 2 Parent (This Level 1 component is parent for Level 2 components)</span>
+                        </label>
+                        <p class="mt-1 text-xs text-gray-500">Only one Level 1 component can be marked as Level 2 Parent per product</p>
+                    </div>
                 </div>
             `;
 

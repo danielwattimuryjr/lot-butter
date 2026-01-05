@@ -61,7 +61,6 @@ class MPSController extends Controller
         // Get existing MPS records for edited values
         $mpsRecords = MasterProductionSchedule::where('product_variant_id', $variant->id)
             ->where('year', $currentYear)
-            ->where('is_edited', true)
             ->get();
 
         // Calculate sales percentage for this variant
