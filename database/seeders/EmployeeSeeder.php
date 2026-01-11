@@ -44,7 +44,7 @@ class EmployeeSeeder extends Seeder
                 'nip' => '00000000001',
                 'phone_number' => '081234567890',
                 'team_id' => $teams['Owner'],
-            ]
+            ],
         ];
 
         foreach ($employees as $employeeData) {
@@ -57,11 +57,11 @@ class EmployeeSeeder extends Seeder
             // Create user account for the employee
             User::create([
                 'employee_id' => $employee->id,
-                'username' => 'user.' . StringHelper::toSnakeCase($teamName),
+                'username' => 'user.'.StringHelper::toSnakeCase($teamName),
                 'password' => Hash::make('password'),
             ])->addRole('employee');
         }
 
-        $this->command->info('Created ' . count($employees) . ' employees with user accounts');
+        $this->command->info('Created '.count($employees).' employees with user accounts');
     }
 }

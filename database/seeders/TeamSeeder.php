@@ -30,13 +30,13 @@ class TeamSeeder extends Seeder
             [
                 'name' => 'Owner',
                 'description' => 'Oversees company operations',
-            ]
+            ],
         ];
 
         foreach ($teams as $team) {
             Team::create($team);
         }
 
-        $this->command->info('Created ' . count($teams) . ' teams successfully');
+        $this->command->info('Created '.count($teams).' teams successfully');
     }
 }

@@ -106,10 +106,10 @@ class IncomeSeeder extends Seeder
                 $amount = $variantQuantity * $unitPrice;
 
                 $income = Income::create([
-                    'code' => 'INC-' . str_pad(($index * 3) + $variantIndex + 1, 4, '0', STR_PAD_LEFT),
+                    'code' => 'INC-'.str_pad(($index * 3) + $variantIndex + 1, 4, '0', STR_PAD_LEFT),
                     'product_id' => $product->id,
                     'product_variant_id' => $variant->id,
-                    'description' => 'Historical Week ' . $week . ' - ' . $variant->name,
+                    'description' => 'Historical Week '.$week.' - '.$variant->name,
                     'quantity' => $variantQuantity,
                     'unit_price' => $unitPrice,
                     'amount' => $amount,
@@ -126,8 +126,8 @@ class IncomeSeeder extends Seeder
         }
 
         $totalRecords = count($quantities) * $variants->count();
-        $this->command->info('Created ' . $totalRecords . ' income records for Mochi Ichigo Daifuku');
-        $this->command->info('Created ' . $totalRecords . ' journal entries');
+        $this->command->info('Created '.$totalRecords.' income records for Mochi Ichigo Daifuku');
+        $this->command->info('Created '.$totalRecords.' journal entries');
         $this->command->info('Sales percentage distribution: Isi 4 (45.01%), Isi 8 (45.83%), Isi 16 (9.16%)');
     }
 }

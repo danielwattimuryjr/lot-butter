@@ -197,7 +197,7 @@ class MPSController extends Controller
         } catch (Exception $th) {
             DB::rollBack();
 
-            return back()->with('error', 'Failed to update week values: ' . $th->getMessage());
+            return back()->with('error', 'Failed to update week values: '.$th->getMessage());
         }
     }
 }

@@ -17,7 +17,7 @@ class Forecast extends Model
         'seasonal_index',
         'slope',
         'trend',
-        'forecast_value'
+        'forecast_value',
     ];
 
     protected $casts = [

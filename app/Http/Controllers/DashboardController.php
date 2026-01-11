@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Forecast;
-use App\Models\Product;
-use App\Models\Income;
-use App\Models\Purchase;
 use App\Models\Component;
-use Illuminate\Support\Facades\DB;
+use App\Models\Forecast;
+use App\Models\Income;
+use App\Models\Product;
+use App\Models\Purchase;
 
 class DashboardController extends Controller
 {

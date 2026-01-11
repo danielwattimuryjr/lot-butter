@@ -79,7 +79,7 @@ class Income extends Model
 
         static::updated(function ($income) {
             $journalService = app(JournalService::class);
-            
+
             // Handle status changes
             if ($income->wasChanged('status')) {
                 $oldStatus = $income->getOriginal('status');

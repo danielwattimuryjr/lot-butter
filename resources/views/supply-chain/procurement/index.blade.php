@@ -85,13 +85,13 @@
                                     {{ $procurement->date->format("d M Y") }}
                                 </td>
                                 <td class="px-4 py-4 text-center text-sm text-gray-700">
-                                    @if ($procurement->status === 'approved')
+                                    @if ($procurement->status === "approved")
                                         <span
                                             class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800"
                                         >
                                             Approved
                                         </span>
-                                    @elseif ($procurement->status === 'rejected')
+                                    @elseif ($procurement->status === "rejected")
                                         <span
                                             class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800"
                                         >
@@ -109,7 +109,12 @@
                                     <div class="flex items-center justify-center gap-3">
                                         <!-- View Details Button -->
                                         <button
-                                            onclick="openDetailsModal('{{ route('employee.supply-chain.procurements.show', $procurement) }}', 'Purchase Details')"
+                                            onclick="
+                                                openDetailsModal(
+                                                    '{{ route("employee.supply-chain.procurements.show", $procurement) }}',
+                                                    'Purchase Details',
+                                                )
+                                            "
                                             class="text-blue-600 transition-colors hover:text-blue-700"
                                             title="View Details"
                                         >
@@ -147,7 +152,7 @@
                                             </form>
                                         @endif
 
-                                        @if (auth()->user()->team->name == "Owner" && $procurement->status === 'pending')
+                                        @if (auth()->user()->team->name == "Owner" && $procurement->status === "pending")
                                             <form
                                                 method="POST"
                                                 action="{{ route("employee.supply-chain.procurements.approve", $procurement) }}"

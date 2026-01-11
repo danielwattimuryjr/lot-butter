@@ -91,13 +91,13 @@
                                     {{ $income->date_received->format("d M Y") }}
                                 </td>
                                 <td class="px-4 py-4 text-center text-sm text-gray-700">
-                                    @if ($income->status === 'approved')
+                                    @if ($income->status === "approved")
                                         <span
                                             class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800"
                                         >
                                             Approved
                                         </span>
-                                    @elseif ($income->status === 'rejected')
+                                    @elseif ($income->status === "rejected")
                                         <span
                                             class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800"
                                         >
@@ -115,7 +115,12 @@
                                     <div class="flex items-center justify-center gap-3">
                                         <!-- View Details Button -->
                                         <button
-                                            onclick="openDetailsModal('{{ route('employee.finance.incomes.show', $income) }}', 'Income Details')"
+                                            onclick="
+                                                openDetailsModal(
+                                                    '{{ route("employee.finance.incomes.show", $income) }}',
+                                                    'Income Details',
+                                                )
+                                            "
                                             class="text-blue-600 transition-colors hover:text-blue-700"
                                             title="View Details"
                                         >
@@ -153,7 +158,7 @@
                                             </form>
                                         @endif
 
-                                        @if (auth()->user()->team->name == "Owner" && $income->status === 'pending')
+                                        @if (auth()->user()->team->name == "Owner" && $income->status === "pending")
                                             <form
                                                 method="POST"
                                                 action="{{ route("employee.finance.incomes.approve", $income) }}"

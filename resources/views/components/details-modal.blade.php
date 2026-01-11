@@ -2,7 +2,7 @@
 <div
     id="detailsModal"
     class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50 p-4"
-    onclick="if(event.target === this) closeDetailsModal()"
+    onclick="if (event.target === this) closeDetailsModal();"
 >
     <div class="w-full max-w-2xl rounded-xl bg-white shadow-2xl" onclick="event.stopPropagation()">
         <!-- Modal Header -->
@@ -21,7 +21,9 @@
             <div id="modalContent" class="space-y-4">
                 <!-- Loading State -->
                 <div id="loadingState" class="flex items-center justify-center py-8">
-                    <div class="h-8 w-8 animate-spin rounded-full border-4 border-butter-500 border-t-transparent"></div>
+                    <div
+                        class="h-8 w-8 animate-spin rounded-full border-4 border-butter-500 border-t-transparent"
+                    ></div>
                 </div>
 
                 <!-- Content will be inserted here -->
@@ -52,7 +54,7 @@
         modal.classList.add('flex');
         modalTitle.textContent = title;
         loadingState.classList.remove('hidden');
-        
+
         // Clear previous content
         const existingContent = modalContent.querySelector('#detailsContent');
         if (existingContent) {
@@ -63,52 +65,55 @@
         fetch(url, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
-            }
+                Accept: 'application/json',
+            },
         })
-        .then(response => response.json())
-        .then(data => {
-            loadingState.classList.add('hidden');
-            
-            // Create content HTML
-            const contentHtml = `
+            .then((response) => response.json())
+            .then((data) => {
+                loadingState.classList.add('hidden');
+
+                // Create content HTML
+                const contentHtml = `
                 <div id="detailsContent" class="grid gap-4 sm:grid-cols-2">
-                    ${Object.entries(data).map(([key, value]) => {
-                        const label = key.split('_').map(word => 
-                            word.charAt(0).toUpperCase() + word.slice(1)
-                        ).join(' ');
-                        
-                        let displayValue = value;
-                        if (key === 'status') {
-                            const statusColors = {
-                                'approved': 'bg-green-100 text-green-800',
-                                'rejected': 'bg-red-100 text-red-800',
-                                'pending': 'bg-yellow-100 text-yellow-800'
-                            };
-                            displayValue = `<span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColors[value] || 'bg-gray-100 text-gray-800'}">${value.charAt(0).toUpperCase() + value.slice(1)}</span>`;
-                        }
-                        
-                        return `
+                    ${Object.entries(data)
+                        .map(([key, value]) => {
+                            const label = key
+                                .split('_')
+                                .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                                .join(' ');
+
+                            let displayValue = value;
+                            if (key === 'status') {
+                                const statusColors = {
+                                    approved: 'bg-green-100 text-green-800',
+                                    rejected: 'bg-red-100 text-red-800',
+                                    pending: 'bg-yellow-100 text-yellow-800',
+                                };
+                                displayValue = `<span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColors[value] || 'bg-gray-100 text-gray-800'}">${value.charAt(0).toUpperCase() + value.slice(1)}</span>`;
+                            }
+
+                            return `
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">${label}</dt>
                                 <dd class="mt-1 text-sm text-gray-900">${displayValue}</dd>
                             </div>
                         `;
-                    }).join('')}
+                        })
+                        .join('')}
                 </div>
             `;
-            
-            modalContent.insertAdjacentHTML('beforeend', contentHtml);
-        })
-        .catch(error => {
-            loadingState.classList.add('hidden');
-            modalContent.innerHTML += `
+
+                modalContent.insertAdjacentHTML('beforeend', contentHtml);
+            })
+            .catch((error) => {
+                loadingState.classList.add('hidden');
+                modalContent.innerHTML += `
                 <div id="detailsContent" class="rounded-lg bg-red-50 p-4 text-center">
                     <p class="text-sm text-red-800">Failed to load details. Please try again.</p>
                 </div>
             `;
-            console.error('Error fetching details:', error);
-        });
+                console.error('Error fetching details:', error);
+            });
     }
 
     function closeDetailsModal() {
@@ -118,7 +123,7 @@
     }
 
     // Close modal on Escape key
-    document.addEventListener('keydown', function(event) {
+    document.addEventListener('keydown', function (event) {
         if (event.key === 'Escape') {
             closeDetailsModal();
         }

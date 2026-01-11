@@ -44,7 +44,6 @@ class MRPController extends Controller
                 ->distinct();
         })->get();
 
-
         // Get Level 2 components from Product BOM
         $level2Components = Component::whereIn('id', function ($query) use ($product) {
             $query->select('component_id')
@@ -314,10 +313,10 @@ class MRPController extends Controller
             ->where('year', $year)
             ->where('week', $week)
             ->where('component_id', $entityId)
-            ->when($level == '0', fn($q) => $q->where('product_variant_id', $entityId))
-            ->when($level == '1' && isset($variantId) && $variantId, fn($q) => $q->where('product_variant_id', $variantId))
-            ->when($level == '1' && (! isset($variantId) || ! $variantId), fn($q) => $q->where('product_id', $product->id))
-            ->when($level == '2', fn($q) => $q->where('product_id', $product->id))
+            ->when($level == '0', fn ($q) => $q->where('product_variant_id', $entityId))
+            ->when($level == '1' && isset($variantId) && $variantId, fn ($q) => $q->where('product_variant_id', $variantId))
+            ->when($level == '1' && (! isset($variantId) || ! $variantId), fn ($q) => $q->where('product_id', $product->id))
+            ->when($level == '2', fn ($q) => $q->where('product_id', $product->id))
             ->first();
 
         return view('production.mrp.edit', compact(
@@ -417,7 +416,7 @@ class MRPController extends Controller
         } catch (Exception $th) {
             DB::rollBack();
 
-            return back()->with('error', 'Failed to update MRP values: ' . $th->getMessage());
+            return back()->with('error', 'Failed to update MRP values: '.$th->getMessage());
         }
     }
 }

@@ -62,7 +62,7 @@ class Purchase extends Model
 
         static::updated(function ($purchase) {
             $journalService = app(JournalService::class);
-            
+
             // Handle status changes
             if ($purchase->wasChanged('status')) {
                 $oldStatus = $purchase->getOriginal('status');

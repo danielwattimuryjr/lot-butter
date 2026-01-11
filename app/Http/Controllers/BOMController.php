@@ -22,7 +22,7 @@ class BOMController extends Controller
         if (! $productId) {
             $products = Product::query()
                 ->when($search, function ($query, $search) {
-                    $query->where('name', 'like', '%' . $search . '%');
+                    $query->where('name', 'like', '%'.$search.'%');
                 })
                 ->get();
 

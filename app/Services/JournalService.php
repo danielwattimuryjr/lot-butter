@@ -13,7 +13,7 @@ class JournalService
         return Journal::create([
             'code' => $this->generateJournalCode(),
             'date' => $income->date_received,
-            'description' => 'Revenue - ' . $income->description,
+            'description' => 'Revenue - '.$income->description,
             'debit' => $income->amount,
             'credit' => null,
             'balance' => $lastBalance + $income->amount,
@@ -31,7 +31,7 @@ class JournalService
         return Journal::create([
             'code' => $this->generateJournalCode(),
             'date' => $purchase->date,
-            'description' => 'Purchase - ' . $purchase->description,
+            'description' => 'Purchase - '.$purchase->description,
             'debit' => null,
             'credit' => $purchase->total_amount,
             'balance' => $lastBalance - $purchase->total_amount,
@@ -53,7 +53,7 @@ class JournalService
 
             $journal->update([
                 'date' => $income->date_received,
-                'description' => 'Revenue - ' . $income->description,
+                'description' => 'Revenue - '.$income->description,
                 'debit' => $income->amount,
                 'balance' => $previousBalance + $income->amount,
             ]);
@@ -73,7 +73,7 @@ class JournalService
 
             $journal->update([
                 'date' => $purchase->date,
-                'description' => 'Purchase - ' . $purchase->description,
+                'description' => 'Purchase - '.$purchase->description,
                 'credit' => $purchase->total_amount,
                 'balance' => $previousBalance - $purchase->total_amount,
             ]);
@@ -143,6 +143,6 @@ class JournalService
             ? intval(substr($lastJournal->code, 1))
             : 0;
 
-        return 'J' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+        return 'J'.str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
     }
 }
