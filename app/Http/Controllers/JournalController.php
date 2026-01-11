@@ -17,6 +17,7 @@ class JournalController extends Controller
                 fn($query, $name) => $query->where('description', 'like', "%{$name}%"),
             )
             ->latest('date')
+            ->latest('id')
             ->paginate($request->input('limit', $limit))
             ->withQueryString();
 
