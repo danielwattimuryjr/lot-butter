@@ -14,8 +14,8 @@ class JournalService
             'code' => $this->generateJournalCode(),
             'date' => $income->date_received,
             'description' => 'Revenue - ' . $income->description,
-            'debit' => null,
-            'credit' => $income->amount,
+            'debit' => $income->amount,
+            'credit' => null,
             'balance' => $lastBalance + $income->amount,
             'transaction_type' => 'income',
             'reference_table' => 'incomes',
@@ -32,8 +32,8 @@ class JournalService
             'code' => $this->generateJournalCode(),
             'date' => $purchase->date,
             'description' => 'Purchase - ' . $purchase->description,
-            'debit' => $purchase->total_amount,
-            'credit' => null,
+            'debit' => null,
+            'credit' => $purchase->total_amount,
             'balance' => $lastBalance - $purchase->total_amount,
             'transaction_type' => 'purchase',
             'reference_table' => 'purchases',
@@ -54,7 +54,7 @@ class JournalService
             $journal->update([
                 'date' => $income->date_received,
                 'description' => 'Revenue - ' . $income->description,
-                'credit' => $income->amount,
+                'debit' => $income->amount,
                 'balance' => $previousBalance + $income->amount,
             ]);
 
@@ -74,7 +74,7 @@ class JournalService
             $journal->update([
                 'date' => $purchase->date,
                 'description' => 'Purchase - ' . $purchase->description,
-                'debit' => $purchase->total_amount,
+                'credit' => $purchase->total_amount,
                 'balance' => $previousBalance - $purchase->total_amount,
             ]);
 

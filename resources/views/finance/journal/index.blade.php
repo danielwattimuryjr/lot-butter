@@ -118,7 +118,7 @@
                                 </td>
                                 <td class="px-4 py-4 text-right text-sm text-gray-700">
                                     @if ($journal->debit)
-                                        <span class="font-medium text-red-600">
+                                        <span class="font-medium text-green-600">
                                             Rp {{ number_format($journal->debit, 0, ",", ".") }}
                                         </span>
                                     @else
@@ -127,7 +127,7 @@
                                 </td>
                                 <td class="px-4 py-4 text-right text-sm text-gray-700">
                                     @if ($journal->credit)
-                                        <span class="font-medium text-green-600">
+                                        <span class="font-medium text-red-600">
                                             Rp {{ number_format($journal->credit, 0, ",", ".") }}
                                         </span>
                                     @else

@@ -14,7 +14,7 @@ class JournalController extends Controller
         $journals = Journal::query()
             ->when(
                 $request->input('name'),
-                fn ($query, $name) => $query->where('description', 'like', "%{$name}%"),
+                fn($query, $name) => $query->where('description', 'like', "%{$name}%"),
             )
             ->latest('date')
             ->paginate($request->input('limit', $limit))
@@ -26,12 +26,12 @@ class JournalController extends Controller
         // Get this month's expenses (debit)
         $thisMonthExpenses = Journal::whereYear('date', now()->year)
             ->whereMonth('date', now()->month)
-            ->sum('debit');
+            ->sum('credit');
 
         // Get this month's revenue (credit)
         $thisMonthRevenue = Journal::whereYear('date', now()->year)
             ->whereMonth('date', now()->month)
-            ->sum('credit');
+            ->sum('debit');
 
         return view('finance.journal.index', compact(
             'journals',
