@@ -18,6 +18,7 @@ class Income extends Model
         'amount',
         'date_received',
         'week',
+        'status',
     ];
 
     protected $casts = [
@@ -26,6 +27,10 @@ class Income extends Model
         'unit_price' => 'decimal:2',
         'amount' => 'decimal:2',
         'week' => 'integer',
+    ];
+
+    protected $attributes = [
+        'status' => 'pending',
     ];
 
     protected static function boot()
@@ -52,8 +57,10 @@ class Income extends Model
         });
 
         static::created(function ($income) {
-            $journalService = app(JournalService::class);
-            $journalService->createFromIncome($income);
+            if ($income->status === 'approved') {
+                $journalService = app(JournalService::class);
+                $journalService->createFromIncome($income);
+            }
         });
 
         static::updating(function ($income) {
@@ -71,15 +78,38 @@ class Income extends Model
         });
 
         static::updated(function ($income) {
-            if ($income->wasChanged(['amount', 'date_received', 'description'])) {
-                $journalService = app(JournalService::class);
+            $journalService = app(JournalService::class);
+            
+            // Handle status changes
+            if ($income->wasChanged('status')) {
+                $oldStatus = $income->getOriginal('status');
+                $newStatus = $income->status;
+
+                // If changing to approved, create journal entry
+                if ($newStatus === 'approved') {
+                    $journalService->createFromIncome($income);
+                }
+                // If changing from approved to pending/rejected, delete journal entry
+                elseif ($oldStatus === 'approved' && in_array($newStatus, ['pending', 'rejected'])) {
+                    $journalService->deleteFromIncome($income);
+                }
+                // If changing to rejected (from pending), delete journal if exists
+                elseif ($newStatus === 'rejected') {
+                    $journalService->deleteFromIncome($income);
+                }
+            }
+            // If status is approved and financial data changed, update journal
+            elseif ($income->status === 'approved' && $income->wasChanged(['amount', 'date_received', 'description', 'quantity', 'unit_price'])) {
                 $journalService->updateFromIncome($income);
             }
         });
 
         static::deleted(function ($income) {
-            $journalService = app(JournalService::class);
-            $journalService->deleteFromIncome($income);
+            // Only delete journal entry if the income was approved
+            if ($income->status === 'approved') {
+                $journalService = app(JournalService::class);
+                $journalService->deleteFromIncome($income);
+            }
         });
     }
 

@@ -29,6 +29,26 @@ class ProcurementController extends Controller
         return view('supply-chain.procurement.index', compact('procurements'));
     }
 
+    public function show(Purchase $purchase)
+    {
+        $purchase->load(['component', 'journal']);
+
+        return response()->json([
+            'code' => $purchase->code,
+            'component' => $purchase->component->name,
+            'description' => $purchase->description,
+            'quantity' => number_format($purchase->quantity),
+            'unit_price' => 'Rp ' . number_format($purchase->unit_price, 0, ',', '.'),
+            'total_amount' => 'Rp ' . number_format($purchase->total_amount, 0, ',', '.'),
+            'date' => $purchase->date->format('d M Y'),
+            'week' => $purchase->week,
+            'supplier' => $purchase->supplier ?? '-',
+            'status' => $purchase->status,
+            'created_at' => $purchase->created_at->format('d M Y H:i'),
+            'updated_at' => $purchase->updated_at->format('d M Y H:i'),
+        ]);
+    }
+
     public function create()
     {
         $components = Component::get(['id', 'name']);
@@ -98,6 +118,38 @@ class ProcurementController extends Controller
             return back()
                 ->withInput()
                 ->with('error', 'Failed to delete procurement entry: '.$e->getMessage());
+        }
+    }
+
+    public function approve(Purchase $purchase)
+    {
+        DB::beginTransaction();
+        try {
+            $purchase->update(['status' => 'approved']);
+
+            DB::commit();
+
+            return back()->with('success', 'Purchase approved successfully');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return back()->with('error', 'Failed to approve purchase: '.$e->getMessage());
+        }
+    }
+
+    public function reject(Purchase $purchase)
+    {
+        DB::beginTransaction();
+        try {
+            $purchase->update(['status' => 'rejected']);
+
+            DB::commit();
+
+            return back()->with('success', 'Purchase rejected successfully');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return back()->with('error', 'Failed to reject purchase: '.$e->getMessage());
         }
     }
 }

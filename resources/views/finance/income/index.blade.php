@@ -57,15 +57,10 @@
                             <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Income Code</th>
                             <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Product</th>
                             <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Variant</th>
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Description</th>
-                            <th class="px-4 py-3 text-right text-sm font-medium text-gray-600">Qty</th>
-                            <th class="px-4 py-3 text-right text-sm font-medium text-gray-600">Unit Price</th>
                             <th class="px-4 py-3 text-right text-sm font-medium text-gray-600">Amount</th>
                             <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">Date</th>
-                            <th class="px-4 py-3 text-center text-sm font-medium text-gray-600">Week</th>
-                            @if (auth()->user()->team->name == "Finance")
-                                <th class="px-4 py-3 text-center text-sm font-medium text-gray-600">Actions</th>
-                            @endif
+                            <th class="px-4 py-3 text-center text-sm font-medium text-gray-600">Status</th>
+                            <th class="px-4 py-3 text-center text-sm font-medium text-gray-600">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -89,17 +84,6 @@
                                         <span class="text-gray-400">-</span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-4 text-sm text-gray-600">
-                                    <div class="max-w-xs truncate" title="{{ $income->description }}">
-                                        {{ $income->description }}
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4 text-right text-sm text-gray-700">
-                                    {{ number_format($income->quantity) }}
-                                </td>
-                                <td class="px-4 py-4 text-right text-sm text-gray-700">
-                                    Rp {{ number_format($income->unit_price, 0, ",", ".") }}
-                                </td>
                                 <td class="px-4 py-4 text-right text-sm font-medium text-gray-900">
                                     Rp {{ number_format($income->amount, 0, ",", ".") }}
                                 </td>
@@ -107,15 +91,38 @@
                                     {{ $income->date_received->format("d M Y") }}
                                 </td>
                                 <td class="px-4 py-4 text-center text-sm text-gray-700">
-                                    <span
-                                        class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800"
-                                    >
-                                        W{{ $income->week }}
-                                    </span>
+                                    @if ($income->status === 'approved')
+                                        <span
+                                            class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800"
+                                        >
+                                            Approved
+                                        </span>
+                                    @elseif ($income->status === 'rejected')
+                                        <span
+                                            class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800"
+                                        >
+                                            Rejected
+                                        </span>
+                                    @else
+                                        <span
+                                            class="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800"
+                                        >
+                                            Pending
+                                        </span>
+                                    @endif
                                 </td>
-                                @if (auth()->user()->team->name == "Finance")
-                                    <td class="px-4 py-4">
-                                        <div class="flex items-center justify-center gap-3">
+                                <td class="px-4 py-4">
+                                    <div class="flex items-center justify-center gap-3">
+                                        <!-- View Details Button -->
+                                        <button
+                                            onclick="openDetailsModal('{{ route('employee.finance.incomes.show', $income) }}', 'Income Details')"
+                                            class="text-blue-600 transition-colors hover:text-blue-700"
+                                            title="View Details"
+                                        >
+                                            <x-heroicon-o-eye class="h-5 w-5" />
+                                        </button>
+
+                                        @if (auth()->user()->team->name == "Finance")
                                             <a
                                                 href="{{ route("employee.finance.incomes.edit", $income) }}"
                                                 class="text-orange-400 transition-colors hover:text-orange-600"
@@ -144,13 +151,50 @@
                                                     <x-heroicon-o-trash class="h-5 w-5" />
                                                 </button>
                                             </form>
-                                        </div>
-                                    </td>
-                                @endif
+                                        @endif
+
+                                        @if (auth()->user()->team->name == "Owner" && $income->status === 'pending')
+                                            <form
+                                                method="POST"
+                                                action="{{ route("employee.finance.incomes.approve", $income) }}"
+                                                class="inline-flex items-center"
+                                                onsubmit="return confirm('Approve this income record?');"
+                                            >
+                                                @csrf
+                                                @method("PATCH")
+
+                                                <button
+                                                    type="submit"
+                                                    class="text-green-600 transition-colors hover:text-green-700"
+                                                    title="Approve"
+                                                >
+                                                    <x-heroicon-o-check-circle class="h-5 w-5" />
+                                                </button>
+                                            </form>
+                                            <form
+                                                method="POST"
+                                                action="{{ route("employee.finance.incomes.reject", $income) }}"
+                                                class="inline-flex items-center"
+                                                onsubmit="return confirm('Reject this income record?');"
+                                            >
+                                                @csrf
+                                                @method("PATCH")
+
+                                                <button
+                                                    type="submit"
+                                                    class="text-red-600 transition-colors hover:text-red-700"
+                                                    title="Reject"
+                                                >
+                                                    <x-heroicon-o-x-circle class="h-5 w-5" />
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </td>
                             </tr>
                         @empty
                             <tr class="border-b border-gray-100">
-                                <td colspan="11" class="px-4 py-12 text-center">
+                                <td colspan="8" class="px-4 py-12 text-center">
                                     <div class="flex flex-col items-center justify-center">
                                         <x-heroicon-o-inbox class="h-12 w-12 text-gray-400" />
                                         <p class="mt-2 text-sm font-medium text-gray-900">No income records found</p>
@@ -169,4 +213,7 @@
             <x-table-pagination :paginator="$incomes" />
         </div>
     </div>
+
+    <!-- Details Modal -->
+    <x-details-modal />
 @endsection

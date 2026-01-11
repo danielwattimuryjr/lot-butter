@@ -84,18 +84,21 @@ class JournalService
 
     public function deleteFromIncome($income)
     {
-        $this->deleteJournalEntry('incomes', $income->id);
+        $journal = Journal::where('reference_table', 'incomes')
+            ->where('reference_id', $income->id)
+            ->first();
+
+        if ($journal) {
+            $journalId = $journal->id;
+            $journal->delete();
+            $this->recalculateBalancesAfter($journalId);
+        }
     }
 
     public function deleteFromPurchase($purchase)
     {
-        $this->deleteJournalEntry('purchases', $purchase->id);
-    }
-
-    private function deleteJournalEntry($table, $id)
-    {
-        $journal = Journal::where('reference_table', $table)
-            ->where('reference_id', $id)
+        $journal = Journal::where('reference_table', 'purchases')
+            ->where('reference_id', $purchase->id)
             ->first();
 
         if ($journal) {

@@ -39,6 +39,12 @@ class EmployeeSeeder extends Seeder
                 'phone_number' => '08887187265',
                 'team_id' => $teams['Production'],
             ],
+            [
+                'name' => 'Owner',
+                'nip' => '00000000001',
+                'phone_number' => '081234567890',
+                'team_id' => $teams['Owner'],
+            ]
         ];
 
         foreach ($employees as $employeeData) {

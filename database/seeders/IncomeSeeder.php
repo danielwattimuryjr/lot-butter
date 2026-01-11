@@ -115,6 +115,7 @@ class IncomeSeeder extends Seeder
                     'amount' => $amount,
                     'date_received' => $date->toDateString(),
                     'week' => $week,
+                    'status' => 'approved', // Auto-approve historical data
                 ]);
 
                 // Create journal entry using the service

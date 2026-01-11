@@ -8,6 +8,7 @@ def fetch_income_data(product_id: int):
             SUM(quantity) AS total_quantity
         FROM incomes
         WHERE product_id = {int(product_id)}
+        AND status = 'approved'
         GROUP BY date_received
         ORDER BY date_received
     """

@@ -27,6 +27,10 @@ class TeamSeeder extends Seeder
                 'name' => 'Production',
                 'description' => 'Executes manufacturing processes',
             ],
+            [
+                'name' => 'Owner',
+                'description' => 'Oversees company operations',
+            ]
         ];
 
         foreach ($teams as $team) {

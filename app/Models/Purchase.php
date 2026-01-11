@@ -17,6 +17,7 @@ class Purchase extends Model
         'total_amount',
         'date',
         'supplier',
+        'status',
     ];
 
     protected $casts = [
@@ -24,6 +25,10 @@ class Purchase extends Model
         'quantity' => 'integer',
         'unit_price' => 'decimal:2',
         'total_amount' => 'decimal:2',
+    ];
+
+    protected $attributes = [
+        'status' => 'pending',
     ];
 
     protected static function boot()
@@ -39,8 +44,10 @@ class Purchase extends Model
         });
 
         static::created(function ($purchase) {
-            $journalService = app(JournalService::class);
-            $journalService->createFromPurchase($purchase);
+            if ($purchase->status === 'approved') {
+                $journalService = app(JournalService::class);
+                $journalService->createFromPurchase($purchase);
+            }
         });
 
         static::updating(function ($purchase) {
@@ -54,15 +61,38 @@ class Purchase extends Model
         });
 
         static::updated(function ($purchase) {
-            if ($purchase->wasChanged(['total_amount', 'date', 'description'])) {
-                $journalService = app(JournalService::class);
+            $journalService = app(JournalService::class);
+            
+            // Handle status changes
+            if ($purchase->wasChanged('status')) {
+                $oldStatus = $purchase->getOriginal('status');
+                $newStatus = $purchase->status;
+
+                // If changing to approved, create journal entry
+                if ($newStatus === 'approved') {
+                    $journalService->createFromPurchase($purchase);
+                }
+                // If changing from approved to pending/rejected, delete journal entry
+                elseif ($oldStatus === 'approved' && in_array($newStatus, ['pending', 'rejected'])) {
+                    $journalService->deleteFromPurchase($purchase);
+                }
+                // If changing to rejected (from pending), delete journal if exists
+                elseif ($newStatus === 'rejected') {
+                    $journalService->deleteFromPurchase($purchase);
+                }
+            }
+            // If status is approved and financial data changed, update journal
+            elseif ($purchase->status === 'approved' && $purchase->wasChanged(['total_amount', 'date', 'description', 'quantity', 'unit_price'])) {
                 $journalService->updateFromPurchase($purchase);
             }
         });
 
         static::deleted(function ($purchase) {
-            $journalService = app(JournalService::class);
-            $journalService->deleteFromPurchase($purchase);
+            // Only delete journal entry if the purchase was approved
+            if ($purchase->status === 'approved') {
+                $journalService = app(JournalService::class);
+                $journalService->deleteFromPurchase($purchase);
+            }
         });
     }
 

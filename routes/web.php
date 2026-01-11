@@ -97,7 +97,9 @@ Route::middleware(['auth'])->group(function () use ($exceptShow) {
             Route::prefix('finance')
                 ->name('finance.')
                 ->group(function () use ($exceptShow) {
-                    Route::resource('incomes', IncomeController::class, $exceptShow);
+                    Route::resource('incomes', IncomeController::class);
+                    Route::patch('incomes/{income}/approve', [IncomeController::class, 'approve'])->name('incomes.approve');
+                    Route::patch('incomes/{income}/reject', [IncomeController::class, 'reject'])->name('incomes.reject');
                     Route::get('journals', JournalController::class)->name('journals.index');
                 });
 
@@ -110,9 +112,10 @@ Route::middleware(['auth'])->group(function () use ($exceptShow) {
                         ProcurementController::class,
                         [
                             'parameters' => ['procurements' => 'purchase'],
-                            ...$exceptShow
                         ]
                     );
+                    Route::patch('procurements/{purchase}/approve', [ProcurementController::class, 'approve'])->name('procurements.approve');
+                    Route::patch('procurements/{purchase}/reject', [ProcurementController::class, 'reject'])->name('procurements.reject');
                 });
         });
 });
